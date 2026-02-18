@@ -6,6 +6,17 @@ export default defineConfig({
   },
   base: '/X-TEAM-ORG/',
   build: {
-    assetsDir: 'assets'
+    assetsDir: 'assets',
+    rollupOptions: {
+      input: {
+        main: './index.html',
+        suspeitos: './suspeitos.html',
+        investigados: './investigados.html',
+        desativados: './desativados.html',
+        about: './about.html',
+        xia: './xia.html',
+        xdox: './xdox.html'
+      }
+    }
   }
 });
