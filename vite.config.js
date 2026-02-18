@@ -4,5 +4,8 @@ export default defineConfig({
   server: {
     port: 5173
   },
-  base: '/X-TEAM-ORG/'
+  base: '/X-TEAM-ORG/',
+  build: {
+    assetsDir: 'assets'
+  }
 });
