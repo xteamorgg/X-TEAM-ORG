@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sobre X TEAM - X TEAM</title>
+  <link rel="icon" type="image/png" href="/site.png.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/pages.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="terminal-bg"></div>
+  <div class="grid-overlay"></div>
+  
+  <header class="header">
+    <div class="logo">
+      <img src="/site.png.png" alt="X TEAM" class="logo-image">
+      <span class="logo-text">X TEAM</span>
+      <span class="logo-subtitle">CYBER OPS</span>
+    </div>
+    
+    <nav class="nav-menu">
+      <a href="/" class="nav-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        </svg>
+        Home
+      </a>
+      <a href="/suspeitos.html" class="nav-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4m0 4h.01"/>
+        </svg>
+        Suspeitos
+      </a>
+      <a href="/investigados.html" class="nav-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 11l3 3L22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+        Investigados
+      </a>
+      <a href="/desativados.html" class="nav-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        Desativados
+      </a>
+      <a href="/about.html" class="nav-link active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        Sobre
+      </a>
+    </nav>
+
+    <div class="header-actions">
+      <a href="#" id="discord-link" class="icon-btn" title="Servidor Discord">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
+        </svg>
+      </a>
+      <div id="user-section">
+        <button id="login-btn" class="login-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
+          </svg>
+          Login
+        </button>
+        <div id="user-profile" class="user-profile" style="display: none;">
+          <img id="user-avatar" class="user-avatar" src="" alt="Avatar">
+          <span id="user-name" class="user-name"></span>
+          <button id="logout-btn" class="logout-btn">Sair</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="page-header">
+      <div class="page-header-content">
+        <h1 class="page-title">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          Sobre X TEAM
+        </h1>
+        <p class="page-description">Conheça nossa missão, valores e equipe</p>
+      </div>
+    </div>
+
+    <div class="manifesto-section">
+      <h3>QUEM SOMOS</h3>
+      <p>Somos uma organização dedicada à segurança digital e investigação de ameaças cibernéticas. Operamos com precisão técnica e compromisso ético, mantendo os mais altos padrões de profissionalismo.</p>
+      
+      <h3>NOSSA MISSÃO</h3>
+      <p>Identificar, analisar e reportar atividades suspeitas no ambiente digital, contribuindo para um ecossistema mais seguro e responsável. Trabalhamos para proteger comunidades online através de monitoramento ativo e análise técnica.</p>
+      
+      <h3>CÓDIGO DE CONDUTA</h3>
+      <p>Agimos dentro dos limites legais e éticos. Não promovemos ataques ou ações ilegais, apenas investigação responsável e documentação técnica. Respeitamos a privacidade e seguimos protocolos rigorosos de segurança.</p>
+      
+      <h3>COMPROMISSO</h3>
+      <p>Segurança, transparência e responsabilidade digital são os pilares que guiam todas as nossas operações. Mantemos registros detalhados e operamos com total integridade.</p>
+    </div>
+
+    <div class="hierarchy-section">
+      <h2 class="hierarchy-title">ESTRUTURA HIERÁRQUICA</h2>
+      
+      <div class="rank-section">
+        <h4 class="rank-title">X LEADERS – FOUNDERS</h4>
+        <div id="leaders" class="members-list">
+          <div class="empty-state"><p>Carregando membros...</p></div>
+        </div>
+      </div>
+
+      <div class="rank-section">
+        <h4 class="rank-title">X INVESTIGADORES</h4>
+        <div id="investigators" class="members-list">
+          <div class="empty-state"><p>Carregando membros...</p></div>
+        </div>
+      </div>
+
+      <div class="rank-section">
+        <h4 class="rank-title">X AGENTS</h4>
+        <div id="agents" class="members-list">
+          <div class="empty-state"><p>Carregando membros...</p></div>
+        </div>
+      </div>
+
+      <div class="rank-section">
+        <h4 class="rank-title">X NEWBIES</h4>
+        <div id="newbies" class="members-list">
+          <div class="empty-state"><p>Carregando membros...</p></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="/pages.js"></script>
+</body>
+</html>
