@@ -1,6 +1,6 @@
 import './admin.js';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://xteam-platform.onrender.com/api';
 
 // Registrar visita (sempre, mesmo IP)
 async function registerVisit() {

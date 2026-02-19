@@ -161,22 +161,30 @@ Terminal interativo com comandos:
 
 ## 🌐 Deploy
 
+### Render.com (Recomendado)
+
+Deploy completo e automático na Render.com:
+
+1. **Conecte seu repositório** GitHub à Render
+2. **Configure as variáveis de ambiente** no painel da Render:
+   - `DISCORD_TOKEN` - Token do bot Discord
+   - `CLIENT_ID` - ID do bot Discord  
+   - `GUILD_ID` - ID do servidor Discord
+   - `NODE_ENV` - `production`
+
+3. **Deploy automático** a cada push na branch `main`
+
+📖 **Guia completo**: [DEPLOY_RENDER.md](DEPLOY_RENDER.md)
+
 ### Frontend (GitHub Pages)
 
-O deploy é automático via GitHub Actions:
+O frontend pode ser publicado separadamente no GitHub Pages:
 
 1. Faça push para o branch `main`
 2. GitHub Actions faz build automaticamente
 3. Site publicado em `gh-pages` branch
 
-### Backend (Railway/Render)
-
-Veja o guia completo: [GUIA_HOSPEDAGEM.md](GUIA_HOSPEDAGEM.md)
-
-**Opções:**
-- Railway (Recomendado)
-- Render
-- VPS próprio
+📖 **Guia**: [DEPLOY_GITHUB_PAGES.md](DEPLOY_GITHUB_PAGES.md)
 
 ## 📁 Estrutura do Projeto
 
@@ -202,7 +210,7 @@ X-TEAM-ORG/
 - [Comandos Discord](COMANDOS_DISCORD.md)
 - [Comandos Terminal X DOX](COMANDOS_XDOX.md)
 - [Configuração de Cargos](CONFIGURACAO_CARGOS.md)
-- [Guia de Hospedagem](GUIA_HOSPEDAGEM.md)
+- [Deploy na Render](DEPLOY_RENDER.md)
 - [Deploy GitHub Pages](DEPLOY_GITHUB_PAGES.md)
 - [Páginas Admin](ADMIN_PAGES.md)
 - [Cargos Admin](CARGOS_ADMIN.md)

@@ -1,7 +1,6 @@
 // X DOX Terminal functionality
 import './admin.js';
-
-const API_URL = 'http://localhost:3000';
+import { config } from './config.js';
 
 const terminalOutput = document.getElementById('terminal-output');
 const terminalInput = document.getElementById('terminal-input');
@@ -12,17 +11,15 @@ let historyIndex = -1;
 
 // Registrar visita (sempre, mesmo IP)
 async function registerVisit() {
-  // Verificar se já registrou visita nesta sessão
   const visitRegistered = sessionStorage.getItem('visit_registered');
   
   if (visitRegistered) {
-    // Já registrou nesta sessão, apenas atualizar contador
     fetchVisitorCount();
     return;
   }
   
   try {
-    const response = await fetch(`${API_URL}/api/visit`, {
+    const response = await fetch(`${config.apiUrl}/visit`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -33,7 +30,6 @@ async function registerVisit() {
     if (response.ok) {
       const data = await response.json();
       updateVisitorCount(data.total);
-      // Marcar que já registrou visita nesta sessão
       sessionStorage.setItem('visit_registered', 'true');
     }
   } catch (error) {
@@ -44,7 +40,7 @@ async function registerVisit() {
 // Buscar contador de visitantes sem registrar visita
 async function fetchVisitorCount() {
   try {
-    const response = await fetch(`${API_URL}/api/data`);
+    const response = await fetch(`${config.apiUrl}/data`);
     const data = await response.json();
     if (data.visitors) {
       updateVisitorCount(data.visitors.total);
@@ -71,13 +67,16 @@ const commands = {
     return `
 <span style="color: #00ff88;">Comandos Disponíveis:</span>
 
-  <span style="color: #a855f7;">help</span>        - Mostra esta mensagem de ajuda
-  <span style="color: #a855f7;">clear</span>       - Limpa o terminal
-  <span style="color: #a855f7;">status</span>      - Mostra status do sistema
-  <span style="color: #a855f7;">servers</span>     - Lista todos os servidores monitorados
-  <span style="color: #a855f7;">members</span>     - Lista membros da equipe
-  <span style="color: #a855f7;">about</span>       - Informações sobre o sistema
-  <span style="color: #a855f7;">history</span>     - Mostra histórico de comandos
+  <span style="color: #a855f7;">help</span>           - Mostra esta mensagem de ajuda
+  <span style="color: #a855f7;">clear</span>          - Limpa o terminal
+  <span style="color: #a855f7;">status</span>         - Mostra status do sistema
+  <span style="color: #a855f7;">servers</span>        - Lista todos os servidores monitorados
+  <span style="color: #a855f7;">members</span>        - Lista membros da equipe
+  <span style="color: #a855f7;">about</span>          - Informações sobre o sistema
+  <span style="color: #a855f7;">history</span>        - Mostra histórico de comandos
+  <span style="color: #a855f7;">dox <nome></span>     - Busca informações de uma pessoa na API
+  <span style="color: #a855f7;">dox-list</span>       - Lista registros DOX em cache
+  <span style="color: #a855f7;">dox-clear</span>      - Limpa cache de registros DOX
 `;
   },
 
@@ -251,6 +250,143 @@ monitoramento digital e análise técnica.</span>
       output += `  <span style="color: #a855f7;">${index + 1}.</span> ${cmd}\n`;
     });
     return output;
+  },
+
+  dox: async (args) => {
+    if (!args || args.length === 0) {
+      return `<span style="color: #ff5555;">✗ Uso: dox <nome_completo></span>\n<span style="color: #8be9fd;">Exemplo: dox João Silva Santos</span>`;
+    }
+
+    const nomeCompleto = args.join(' ');
+
+    // Mostrar mensagem de busca
+    addLine(`<span style="color: #8be9fd;">🔍 Buscando informações de: ${nomeCompleto}...</span>`, 'response');
+
+    try {
+      // IMPORTANTE: Substitua pela URL da sua API real de consulta
+      const DOX_API_URL = 'https://sua-api-de-consulta.com/api/buscar';
+      
+      // Fazer requisição para a API de consulta
+      const response = await fetch(`${DOX_API_URL}?nome=${encodeURIComponent(nomeCompleto)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('API de consulta não disponível');
+      }
+
+      const apiData = await response.json();
+
+      // Verificar se encontrou dados
+      if (!apiData || !apiData.cpf) {
+        return `<span style="color: #ff5555;">✗ Nenhuma informação encontrada para: ${nomeCompleto}</span>\n<span style="color: #8be9fd;">A pessoa pode não estar cadastrada nos bancos de dados disponíveis.</span>`;
+      }
+
+      // Criar registro com os dados encontrados
+      const doxRecord = {
+        id: Date.now().toString(),
+        nomeCompleto: apiData.nome || nomeCompleto,
+        cpf: apiData.cpf || 'Não encontrado',
+        nomeMae: apiData.nomeMae || 'Não encontrado',
+        nomePai: apiData.nomePai || 'Não encontrado',
+        dataNascimento: apiData.dataNascimento || 'Não encontrado',
+        endereco: apiData.endereco || 'Não encontrado',
+        telefone: apiData.telefone || 'Não encontrado',
+        email: apiData.email || 'Não encontrado',
+        rg: apiData.rg || 'Não encontrado',
+        observacoes: apiData.observacoes || 'Nenhuma',
+        buscadoEm: new Date().toISOString(),
+        timestamp: Date.now()
+      };
+
+      // Salvar no cache local (opcional)
+      const cachedRecords = JSON.parse(localStorage.getItem('doxCache') || '[]');
+      const existingIndex = cachedRecords.findIndex(r => r.cpf === doxRecord.cpf);
+      if (existingIndex !== -1) {
+        cachedRecords[existingIndex] = doxRecord;
+      } else {
+        cachedRecords.push(doxRecord);
+      }
+      localStorage.setItem('doxCache', JSON.stringify(cachedRecords));
+
+      const dataBusca = new Date(doxRecord.buscadoEm).toLocaleString('pt-BR');
+
+      return `
+<span style="color: #00ff88;">╔═══════════════════════════════════════════════════════════╗</span>
+<span style="color: #00ff88;">║</span>  <span style="color: #a855f7;">REGISTRO DOX - INFORMAÇÕES PESSOAIS</span>                  <span style="color: #00ff88;">║</span>
+<span style="color: #00ff88;">╚═══════════════════════════════════════════════════════════╝</span>
+
+<span style="color: #8be9fd;">📋 DADOS PESSOAIS:</span>
+  • Nome Completo: <span style="color: #f1fa8c;">${doxRecord.nomeCompleto}</span>
+  • CPF: <span style="color: #f1fa8c;">${doxRecord.cpf}</span>
+  • RG: <span style="color: #f1fa8c;">${doxRecord.rg}</span>
+  • Data de Nascimento: <span style="color: #f1fa8c;">${doxRecord.dataNascimento}</span>
+
+<span style="color: #8be9fd;">👨‍👩‍👦 FILIAÇÃO:</span>
+  • Nome da Mãe: <span style="color: #f1fa8c;">${doxRecord.nomeMae}</span>
+  • Nome do Pai: <span style="color: #f1fa8c;">${doxRecord.nomePai}</span>
+
+<span style="color: #8be9fd;">📍 CONTATO:</span>
+  • Endereço: <span style="color: #f1fa8c;">${doxRecord.endereco}</span>
+  • Telefone: <span style="color: #f1fa8c;">${doxRecord.telefone}</span>
+  • E-mail: <span style="color: #f1fa8c;">${doxRecord.email}</span>
+
+<span style="color: #8be9fd;">📝 OBSERVAÇÕES:</span>
+  ${doxRecord.observacoes}
+
+<span style="color: #8be9fd;">ℹ️ METADADOS:</span>
+  • ID do Registro: <span style="color: #a855f7;">${doxRecord.id}</span>
+  • Data da Busca: <span style="color: #a855f7;">${dataBusca}</span>
+
+<span style="color: #50fa7b;">✓ Informações obtidas com sucesso</span>
+<span style="color: #ff5555;">⚠️ CONFIDENCIAL - USO RESTRITO</span>
+`;
+    } catch (error) {
+      return `<span style="color: #ff5555;">✗ Erro ao buscar informações: ${error.message}</span>\n\n<span style="color: #8be9fd;">Possíveis causas:</span>\n  • API de consulta não configurada\n  • Servidor offline\n  • Pessoa não encontrada nos bancos de dados\n\n<span style="color: #ffb86c;">Configure a API no arquivo de configuração do sistema.</span>`;
+    }
+  },
+
+  'dox-list': async () => {
+    try {
+      // Buscar do cache local
+      const cachedRecords = JSON.parse(localStorage.getItem('doxCache') || '[]');
+
+      if (cachedRecords.length === 0) {
+        return `<span style="color: #ff5555;">✗ Nenhum registro DOX em cache.</span>\n<span style="color: #8be9fd;">Use 'dox <nome>' para buscar informações de uma pessoa.</span>`;
+      }
+
+      let output = `
+<span style="color: #00ff88;">╔═══════════════════════════════════════════════════════════╗</span>
+<span style="color: #00ff88;">║</span>  <span style="color: #a855f7;">REGISTROS DOX EM CACHE</span>                              <span style="color: #00ff88;">║</span>
+<span style="color: #00ff88;">╚═══════════════════════════════════════════════════════════╝</span>
+
+<span style="color: #8be9fd;">Total de registros: ${cachedRecords.length}</span>
+
+`;
+
+      cachedRecords.forEach((record, index) => {
+        const dataBusca = new Date(record.buscadoEm).toLocaleDateString('pt-BR');
+        output += `<span style="color: #a855f7;">${index + 1}.</span> ${record.nomeCompleto} - CPF: ${record.cpf} (${dataBusca})\n`;
+      });
+
+      output += `\n<span style="color: #8be9fd;">Use 'dox-clear' para limpar o cache.</span>`;
+
+      return output;
+    } catch (error) {
+      return `<span style="color: #ff5555;">✗ Erro ao listar registros: ${error.message}</span>`;
+    }
+  },
+
+  'dox-clear': () => {
+    try {
+      localStorage.removeItem('doxCache');
+      return `<span style="color: #50fa7b;">✓ Cache de registros DOX limpo com sucesso.</span>`;
+    } catch (error) {
+      return `<span style="color: #ff5555;">✗ Erro ao limpar cache: ${error.message}</span>`;
+    }
   }
 };
 
@@ -276,14 +412,15 @@ async function executeCommand(input) {
   // Show command in terminal
   addLine(`<span class="terminal-prompt">X-TEAM@admin:~$</span> <span class="terminal-command">${trimmedInput}</span>`, 'command');
 
-  // Parse command
+  // Parse command and arguments
   const parts = trimmedInput.split(' ');
   const command = parts[0].toLowerCase();
+  const args = parts.slice(1);
 
   // Execute command
   if (commands[command]) {
     try {
-      const result = await commands[command]();
+      const result = await commands[command](args);
       if (result !== null) {
         addLine(result, 'response');
       }

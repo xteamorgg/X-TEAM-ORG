@@ -49,7 +49,8 @@ function loadData() {
     },
     visitors: {
       total: 0
-    }
+    },
+    doxRecords: []
   };
 }
 

@@ -1,7 +1,7 @@
 // Detectar ambiente (produção ou desenvolvimento)
 const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-// Como o bot está rodando localmente, sempre usar localhost
-const API_URL = 'http://localhost:3000/api';
+// URL da API baseada no ambiente
+const API_URL = isProduction ? 'https://xteam-platform.onrender.com/api' : 'http://localhost:3000/api';
 
 // Verificar se usuário está logado
 function isUserLoggedIn() {

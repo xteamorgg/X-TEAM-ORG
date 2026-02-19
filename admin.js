@@ -1,5 +1,8 @@
 // Admin authentication and permission checking
-const API_URL = 'http://localhost:3000';
+import { config } from './config.js';
+
+const API_URL = 'https://x-team-org.onrender.com';
+
 const MAIN_GUILD_ID = '1473718425749688442';
 
 // Cargos que têm acesso às páginas admin
@@ -236,7 +239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Load Discord invite link
   try {
-    const response = await fetch(`${API_URL}/api/data`);
+    const response = await fetch(config.apiUrl);
     const data = await response.json();
     
     const discordLink = document.getElementById('discord-link');

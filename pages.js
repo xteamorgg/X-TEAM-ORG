@@ -1,20 +1,17 @@
 import './admin.js';
-
-const API_URL = 'http://localhost:3000/api';
+import { config } from './config.js';
 
 // Registrar visita (sempre, mesmo IP)
 async function registerVisit() {
-  // Verificar se já registrou visita nesta sessão
   const visitRegistered = sessionStorage.getItem('visit_registered');
   
   if (visitRegistered) {
-    // Já registrou nesta sessão, apenas atualizar contador
     fetchVisitorCount();
     return;
   }
   
   try {
-    const response = await fetch(`${API_URL}/visit`, {
+    const response = await fetch(`${config.apiUrl}/visit`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -25,7 +22,6 @@ async function registerVisit() {
     if (response.ok) {
       const data = await response.json();
       updateVisitorCount(data.total);
-      // Marcar que já registrou visita nesta sessão
       sessionStorage.setItem('visit_registered', 'true');
     }
   } catch (error) {
@@ -36,7 +32,7 @@ async function registerVisit() {
 // Buscar contador de visitantes sem registrar visita
 async function fetchVisitorCount() {
   try {
-    const response = await fetch(`${API_URL}/data`);
+    const response = await fetch(`${config.apiUrl}/data`);
     const data = await response.json();
     if (data.visitors) {
       updateVisitorCount(data.visitors.total);
@@ -57,12 +53,15 @@ function updateVisitorCount(count) {
 // Fetch and render data
 async function fetchData() {
   try {
-    const response = await fetch(`${API_URL}/data`);
+    const response = await fetch(config.apiUrl);
     const data = await response.json();
     
     // Update Discord link
     if (data.discordInvite) {
-      document.getElementById('discord-link').href = data.discordInvite;
+      const discordLink = document.getElementById('discord-link');
+      if (discordLink) {
+        discordLink.href = data.discordInvite;
+      }
     }
     
     // Render based on current page
