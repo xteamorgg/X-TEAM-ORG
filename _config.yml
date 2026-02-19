@@ -1,0 +1,28 @@
+# Configuração do GitHub Pages
+baseurl: /X-TEAM-ORG/
+url: https://xteamorgg.github.io/X-TEAM-ORG/
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+plugins:
+  - jekyll-sitemap
+
+# Exclude files from processing
+exclude:
+  - node_modules/
+  - package.json
+  - package-lock.json
+  - vite.config.js
+  - bot/
+  - .env*
+  - README_GITHUB.md
+  - COMANDOS_GIT.md
+  - DEPLOY_GITHUB_PAGES.md
+  - LICENSE
+  - .vscode/
+
+# Include files
+include:
+  - _site/
+  - .nojekyll
