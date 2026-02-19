@@ -15,17 +15,27 @@ const REDIRECT_URI = process.env.REDIRECT_URI || 'http://localhost:3000/api/auth
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 function loadConfig() {
+  // Tentar carregar do arquivo primeiro
   if (existsSync(CONFIG_FILE)) {
-    return JSON.parse(readFileSync(CONFIG_FILE, 'utf-8'));
+    try {
+      const fileConfig = JSON.parse(readFileSync(CONFIG_FILE, 'utf-8'));
+      console.log('✅ Config carregado do arquivo:', fileConfig);
+      return fileConfig;
+    } catch (error) {
+      console.log('⚠️ Erro ao ler config.json:', error.message);
+    }
   }
+  
+  // Se não conseguir ler o arquivo, usar valores padrão
+  console.log('⚠️ Usando config padrão (arquivo não encontrado)');
   return {
     roleIds: {
-      leaders: null,
-      investigators: null,
-      agents: null,
-      newbies: null
+      leaders: '1473718484125880465',
+      investigators: '1473729894356877312',
+      agents: '1473730077786378323',
+      newbies: '1473730153828847840'
     },
-    discordInvite: null
+    discordInvite: 'https://discord.gg/tJWDNCfJ'
   };
 }
 
@@ -34,9 +44,19 @@ function saveConfig(config) {
 }
 
 function loadData() {
+  // Tentar carregar do arquivo primeiro
   if (existsSync(DATA_FILE)) {
-    return JSON.parse(readFileSync(DATA_FILE, 'utf-8'));
+    try {
+      const fileData = JSON.parse(readFileSync(DATA_FILE, 'utf-8'));
+      console.log('✅ Data carregado do arquivo');
+      return fileData;
+    } catch (error) {
+      console.log('⚠️ Erro ao ler data.json:', error.message);
+    }
   }
+  
+  // Se não conseguir ler o arquivo, usar valores padrão
+  console.log('⚠️ Usando data padrão (arquivo não encontrado)');
   return {
     suspiciousServers: [],
     investigatedServers: [],
