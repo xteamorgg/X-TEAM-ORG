@@ -105,6 +105,21 @@
     <div id="terminated-servers" class="server-list"></div>
   </main>
 
+  <!-- Botão flutuante de denúncia -->
+  <button class="report-float-btn" onclick="openReportModal()" title="Denunciar Servidor">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  </button>
+
+  <!-- Modal de denúncia -->
+  <div id="report-modal" class="report-modal">
+    <div class="report-modal-content">
+      <!-- Conteúdo será inserido dinamicamente pelo report.js -->
+    </div>
+  </div>
+
   <script type="module" src="./pages.js"></script>
+  <script src="./report.js"></script>
 </body>
 </html>
