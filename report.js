@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:3000/api';
+// Detectar ambiente (produção ou desenvolvimento)
+const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+const API_URL = isProduction ? 'https://seu-servidor-api.com/api' : 'http://localhost:3000/api';
 
 // Verificar se usuário está logado
 function isUserLoggedIn() {
