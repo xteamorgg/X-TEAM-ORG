@@ -227,6 +227,11 @@ body {
   box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
 }
 
+.icon-btn:hover svg {
+  stroke: var(--neon-blue);
+  fill: var(--neon-blue);
+}
+
 .login-btn {
   background: linear-gradient(135deg, var(--neon-purple), var(--neon-green));
   color: white;
