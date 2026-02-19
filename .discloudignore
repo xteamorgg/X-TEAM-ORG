@@ -1,0 +1,25 @@
+# Arquivos que não devem ser enviados para DisCloud
+node_modules/
+.git/
+.github/
+dist/
+.vscode/
+*.md
+*.html
+*.css
+style.css
+pages.css
+main.js
+pages.js
+nav.js
+xdox.js
+admin.js
+report.js
+config.js
+vite.config.js
+.gitignore
+.nojekyll
+_config.yml
+site.png.png
+fix-links.py
+package-lock.json
