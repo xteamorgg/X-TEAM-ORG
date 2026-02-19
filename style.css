@@ -132,16 +132,31 @@ body {
   border: 1px solid transparent;
 }
 
+.nav-link svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+}
+
 .nav-link:hover {
   color: var(--neon-purple);
   background: rgba(168, 85, 247, 0.1);
   border-color: rgba(168, 85, 247, 0.3);
 }
 
+.nav-link:hover svg {
+  stroke: var(--neon-purple);
+}
+
 .nav-link.active {
   color: var(--neon-green);
   background: rgba(16, 185, 129, 0.1);
   border-color: rgba(16, 185, 129, 0.3);
+}
+
+.nav-link.active svg {
+  stroke: var(--neon-green);
 }
 
 .header-actions {
@@ -196,6 +211,13 @@ body {
   transition: all 0.3s;
   cursor: pointer;
   text-decoration: none;
+}
+
+.icon-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: currentColor;
 }
 
 .icon-btn:hover {
