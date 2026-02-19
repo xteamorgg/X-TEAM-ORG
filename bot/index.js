@@ -85,17 +85,32 @@ async function syncMembers(guild) {
     newbies: []
   };
 
-  if (!guild) return members;
+  if (!guild) {
+    console.log('❌ Guild não encontrada');
+    return members;
+  }
 
   try {
+    console.log('🔄 Iniciando sincronização de membros...');
+    console.log('📋 Config de cargos:', botConfig.roleIds);
+    
     // Buscar membros do servidor
     await guild.members.fetch();
+    console.log(`👥 Total de membros no servidor: ${guild.memberCount}`);
 
     for (const [key, roleId] of Object.entries(botConfig.roleIds)) {
-      if (!roleId) continue;
+      if (!roleId) {
+        console.log(`⚠️ Cargo ${key} não configurado`);
+        continue;
+      }
 
       const role = guild.roles.cache.get(roleId);
-      if (!role) continue;
+      if (!role) {
+        console.log(`❌ Cargo ${key} (ID: ${roleId}) não encontrado no servidor`);
+        continue;
+      }
+
+      console.log(`✅ Cargo ${key} encontrado: ${role.name} (${role.members.size} membros)`);
 
       members[key] = role.members.map(member => ({
         nick: member.user.username,
