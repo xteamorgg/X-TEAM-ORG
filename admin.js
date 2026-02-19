@@ -10,6 +10,13 @@ const ADMIN_ROLE_IDS = [
   '1473791113650372618'  // Cargo 4
 ];
 
+// Cache de permissões (válido por 5 minutos)
+let permissionsCache = {
+  isAdmin: false,
+  timestamp: 0,
+  ttl: 5 * 60 * 1000 // 5 minutos
+};
+
 // Check if user is logged in
 function getLoggedInUser() {
   const userData = localStorage.getItem('discord_user');
@@ -24,12 +31,23 @@ function getLoggedInUser() {
   return null;
 }
 
+// Check if cache is valid
+function isCacheValid() {
+  const now = Date.now();
+  return (now - permissionsCache.timestamp) < permissionsCache.ttl;
+}
+
 // Check if user has admin permissions in the Discord server
 async function checkAdminPermissions() {
   const auth = getLoggedInUser();
   
   if (!auth) {
     return false;
+  }
+
+  // Usar cache se válido
+  if (isCacheValid()) {
+    return permissionsCache.isAdmin;
   }
 
   try {
@@ -49,6 +67,12 @@ async function checkAdminPermissions() {
       });
 
       if (!guildsResponse.ok) {
+        // Salvar no cache como não-admin
+        permissionsCache = {
+          isAdmin: false,
+          timestamp: Date.now(),
+          ttl: permissionsCache.ttl
+        };
         return false;
       }
 
@@ -56,11 +80,24 @@ async function checkAdminPermissions() {
       const mainGuild = guilds.find(g => g.id === MAIN_GUILD_ID);
       
       if (!mainGuild) {
+        permissionsCache = {
+          isAdmin: false,
+          timestamp: Date.now(),
+          ttl: permissionsCache.ttl
+        };
         return false;
       }
 
       // Se tem permissão de administrador, libera acesso
       const hasAdmin = (mainGuild.permissions & 0x8) === 0x8;
+      
+      // Salvar no cache
+      permissionsCache = {
+        isAdmin: hasAdmin,
+        timestamp: Date.now(),
+        ttl: permissionsCache.ttl
+      };
+      
       return hasAdmin;
     }
 
@@ -69,9 +106,20 @@ async function checkAdminPermissions() {
     // Verifica se o usuário tem algum dos cargos permitidos
     const hasAllowedRole = memberData.roles.some(roleId => ADMIN_ROLE_IDS.includes(roleId));
     
+    // Salvar no cache
+    permissionsCache = {
+      isAdmin: hasAllowedRole,
+      timestamp: Date.now(),
+      ttl: permissionsCache.ttl
+    };
+    
     return hasAllowedRole;
   } catch (error) {
     console.error('Error checking admin permissions:', error);
+    // Em caso de erro, usar cache se disponível
+    if (permissionsCache.timestamp > 0) {
+      return permissionsCache.isAdmin;
+    }
     return false;
   }
 }
@@ -93,7 +141,7 @@ async function updateAdminUI() {
   const currentPath = window.location.pathname;
   if ((currentPath.includes('xia.html') || currentPath.includes('xdox.html')) && !isAdmin) {
     alert('⚠️ Acesso negado. Esta página é restrita a administradores.');
-    window.location.href = '/';
+    window.location.href = './index.html';
   }
 }
 
@@ -108,6 +156,13 @@ function handleOAuthCallback() {
       const user = JSON.parse(decodeURIComponent(userEncoded));
       localStorage.setItem('discord_token', token);
       localStorage.setItem('discord_user', JSON.stringify(user));
+      
+      // Limpar cache de permissões ao fazer novo login
+      permissionsCache = {
+        isAdmin: false,
+        timestamp: 0,
+        ttl: permissionsCache.ttl
+      };
       
       // Remove query params from URL
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -169,6 +224,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     logoutBtn.addEventListener('click', () => {
       localStorage.removeItem('discord_token');
       localStorage.removeItem('discord_user');
+      // Limpar cache de permissões
+      permissionsCache = {
+        isAdmin: false,
+        timestamp: 0,
+        ttl: permissionsCache.ttl
+      };
       window.location.reload();
     });
   }

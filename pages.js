@@ -110,19 +110,194 @@ function renderServers(containerId, servers) {
       ? `<img src="${server.icon}" alt="${server.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;" onerror="this.style.display='none'; this.parentElement.textContent='🔍';">`
       : server.icon || '🔍';
     
+    const onlineInfoHtml = server.inviteCode 
+      ? `<div class="server-online-info" data-invite="${server.inviteCode}">
+           <span class="loading">Carregando...</span>
+         </div>`
+      : '';
+    
     return `
-      <div class="server-card">
+      <div class="server-card" data-server-id="${server.id}">
         <div class="server-header">
           <div class="server-icon">${iconHtml}</div>
           <div class="server-info">
             <h3>${server.name}</h3>
             <div class="server-id">ID: ${server.id}</div>
+            ${onlineInfoHtml}
           </div>
         </div>
         <div class="server-status">${server.status}</div>
       </div>
     `;
   }).join('');
+  
+  // Buscar informações de membros online para servidores com invite
+  servers.forEach(server => {
+    if (server.inviteCode) {
+      fetchServerOnlineInfo(server.inviteCode);
+    } else {
+      // Tentar buscar por ID usando API da Loritta
+      fetchServerInfoById(server.id);
+    }
+  });
+}
+
+// Buscar informações por ID do servidor (API Loritta)
+async function fetchServerInfoById(serverId) {
+  try {
+    const response = await fetch(`${API_URL}/server-info-by-id/${serverId}`);
+    
+    if (!response.ok) {
+      return; // Falhou, não mostrar nada
+    }
+    
+    const data = await response.json();
+    updateServerInfoById(serverId, data);
+  } catch (error) {
+    console.error('Erro ao buscar info do servidor por ID:', error);
+  }
+}
+
+// Atualizar informações do servidor buscado por ID
+function updateServerInfoById(serverId, data) {
+  const serverCard = document.querySelector(`[data-server-id="${serverId}"]`);
+  
+  if (!serverCard) return;
+  
+  // Adicionar banner se existir
+  if (data.banner) {
+    const bannerHtml = `<div class="server-banner-placeholder">
+      <img src="${data.banner}" alt="Banner" class="server-banner">
+    </div>`;
+    serverCard.insertAdjacentHTML('afterbegin', bannerHtml);
+  }
+  
+  // Buscar elemento de info
+  const serverInfo = serverCard.querySelector('.server-info');
+  if (!serverInfo) return;
+  
+  // Criar div para informações extras
+  let infoHtml = `<div class="server-online-info">`;
+  
+  // Adicionar membros online
+  if (data.memberCount > 0) {
+    infoHtml += `
+      <div class="online-stats">
+        <span class="stat">
+          <span class="stat-dot online"></span>
+          ${data.onlineCount || 0} online
+        </span>
+        <span class="stat">
+          <span class="stat-dot"></span>
+          ${data.memberCount} membros
+        </span>
+      </div>
+    `;
+  }
+  
+  // Adicionar tag do servidor
+  if (data.vanityUrlCode) {
+    infoHtml += `
+      <div class="server-vanity">
+        <span class="vanity-label">Tag:</span>
+        <span class="vanity-code">discord.gg/${data.vanityUrlCode}</span>
+      </div>
+    `;
+  }
+  
+  // Adicionar dono do servidor
+  if (data.owner) {
+    const ownerTag = data.owner.discriminator && data.owner.discriminator !== '0'
+      ? `${data.owner.username}#${data.owner.discriminator}`
+      : `@${data.owner.username}`;
+    
+    infoHtml += `
+      <div class="server-owner">
+        <span class="owner-label">Dono:</span>
+        <span class="owner-name">${ownerTag}</span>
+      </div>
+    `;
+  }
+  
+  // Adicionar descrição
+  if (data.description) {
+    infoHtml += `
+      <div class="server-description">
+        ${data.description}
+      </div>
+    `;
+  }
+  
+  // Adicionar badges
+  if (data.features && data.features.length > 0) {
+    const importantFeatures = data.features.filter(f => 
+      ['VERIFIED', 'PARTNERED', 'COMMUNITY', 'DISCOVERABLE'].includes(f)
+    );
+    
+    if (importantFeatures.length > 0) {
+      infoHtml += `
+        <div class="server-badges">
+          ${importantFeatures.map(feature => {
+            const badges = {
+              'VERIFIED': '✓ Verificado',
+              'PARTNERED': '🤝 Parceiro',
+              'COMMUNITY': '👥 Comunidade',
+              'DISCOVERABLE': '🔍 Descobrível'
+            };
+            return `<span class="server-badge">${badges[feature] || feature}</span>`;
+          }).join('')}
+        </div>
+      `;
+    }
+  }
+  
+  infoHtml += `</div>`;
+  
+  // Adicionar ao DOM
+  serverInfo.insertAdjacentHTML('beforeend', infoHtml);
+}
+
+// Buscar informações de membros online via invite
+async function fetchServerOnlineInfo(inviteCode) {
+  try {
+    const response = await fetch(`${API_URL}/server-info/${inviteCode}`);
+    
+    if (!response.ok) {
+      updateOnlineInfo(inviteCode, null);
+      return;
+    }
+    
+    const data = await response.json();
+    updateOnlineInfo(inviteCode, data);
+  } catch (error) {
+    console.error('Erro ao buscar info do servidor:', error);
+    updateOnlineInfo(inviteCode, null);
+  }
+}
+
+// Atualizar informações de membros online no DOM
+function updateOnlineInfo(inviteCode, data) {
+  const element = document.querySelector(`[data-invite="${inviteCode}"]`);
+  
+  if (!element) return;
+  
+  if (!data) {
+    element.innerHTML = '<span class="error">Convite inválido</span>';
+    return;
+  }
+  
+  element.innerHTML = `
+    <div class="online-stats">
+      <span class="stat">
+        <span class="stat-dot online"></span>
+        ${data.onlineCount} online
+      </span>
+      <span class="stat">
+        <span class="stat-dot"></span>
+        ${data.memberCount} membros
+      </span>
+    </div>
+  `;
 }
 
 function renderMembers(containerId, members) {

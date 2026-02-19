@@ -211,6 +211,87 @@ app.post('/api/servers/:type', (req, res) => {
   res.json({ success: true });
 });
 
+// Buscar informações de servidor via invite code
+app.get('/api/server-info/:inviteCode', async (req, res) => {
+  const { inviteCode } = req.params;
+  
+  try {
+    const response = await fetch(`https://discord.com/api/v10/invites/${inviteCode}?with_counts=true&with_expiration=true`);
+    
+    if (!response.ok) {
+      return res.status(404).json({ error: 'Invite não encontrado' });
+    }
+    
+    const data = await response.json();
+    
+    const serverInfo = {
+      name: data.guild.name,
+      icon: data.guild.icon ? `https://cdn.discordapp.com/icons/${data.guild.id}/${data.guild.icon}.png?size=256` : null,
+      banner: data.guild.banner ? `https://cdn.discordapp.com/banners/${data.guild.id}/${data.guild.banner}.png?size=600` : null,
+      splash: data.guild.splash ? `https://cdn.discordapp.com/splashes/${data.guild.id}/${data.guild.splash}.png?size=600` : null,
+      memberCount: data.approximate_member_count || 0,
+      onlineCount: data.approximate_presence_count || 0,
+      description: data.guild.description || null,
+      vanityUrlCode: data.guild.vanity_url_code || null,
+      verificationLevel: data.guild.verification_level || 0,
+      features: data.guild.features || [],
+      inviter: data.inviter ? {
+        username: data.inviter.username,
+        discriminator: data.inviter.discriminator,
+        avatar: data.inviter.avatar ? `https://cdn.discordapp.com/avatars/${data.inviter.id}/${data.inviter.avatar}.png?size=128` : null
+      } : null
+    };
+    
+    res.json(serverInfo);
+  } catch (error) {
+    console.error('Erro ao buscar info do servidor:', error);
+    res.status(500).json({ error: 'Erro ao buscar informações' });
+  }
+});
+
+// Buscar informações de servidor via ID usando API da Loritta
+app.get('/api/server-info-by-id/:serverId', async (req, res) => {
+  const { serverId } = req.params;
+  
+  try {
+    // Tentar API da Loritta primeiro
+    const lorittaResponse = await fetch(`https://loritta.website/api/v1/discord/guild/${serverId}`);
+    
+    if (lorittaResponse.ok) {
+      const lorittaData = await lorittaResponse.json();
+      
+      const serverInfo = {
+        name: lorittaData.name,
+        icon: lorittaData.iconUrl || null,
+        banner: lorittaData.bannerUrl || null,
+        memberCount: lorittaData.memberCount || 0,
+        onlineCount: lorittaData.onlineCount || 0,
+        description: lorittaData.description || null,
+        vanityUrlCode: lorittaData.vanityUrlCode || null,
+        owner: lorittaData.owner ? {
+          username: lorittaData.owner.name,
+          discriminator: lorittaData.owner.discriminator,
+          avatar: lorittaData.owner.avatarUrl || null,
+          id: lorittaData.owner.id
+        } : null,
+        features: lorittaData.features || [],
+        verificationLevel: lorittaData.verificationLevel || 0
+      };
+      
+      return res.json(serverInfo);
+    }
+    
+    // Se Loritta falhar, retornar erro
+    res.status(404).json({ 
+      error: 'Servidor não encontrado',
+      message: 'Use um código de convite válido ou adicione o bot Loritta ao servidor'
+    });
+  } catch (error) {
+    console.error('Erro ao buscar info do servidor:', error);
+    res.status(500).json({ error: 'Erro ao buscar informações' });
+  }
+});
+
 const commands = [
   new SlashCommandBuilder()
     .setName('xteam-config-role')
@@ -256,6 +337,10 @@ const commands = [
     .addStringOption(option =>
       option.setName('foto')
         .setDescription('URL da foto do servidor (opcional)')
+        .setRequired(false))
+    .addStringOption(option =>
+      option.setName('invite')
+        .setDescription('Código do convite (ex: xteam) para mostrar membros online')
         .setRequired(false)),
 
   new SlashCommandBuilder()
@@ -384,19 +469,22 @@ client.on('interactionCreate', async interaction => {
       const serverName = interaction.options.getString('nome');
       const status = interaction.options.getString('status');
       const customPhoto = interaction.options.getString('foto');
+      const inviteCode = interaction.options.getString('invite');
 
       const server = {
         name: serverName,
         id: serverId,
         status: status,
-        icon: customPhoto || '🔍'
+        icon: customPhoto || '🔍',
+        inviteCode: inviteCode || null
       };
 
       botData.suspiciousServers.push(server);
       saveData(botData);
 
       await interaction.reply({
-        content: `✅ Servidor **${serverName}** (ID: ${serverId}) adicionado aos suspeitos`,
+        content: `✅ Servidor **${serverName}** (ID: ${serverId}) adicionado aos suspeitos` +
+                 (inviteCode ? `\n📊 Código de convite: ${inviteCode} (membros online serão exibidos)` : ''),
         ephemeral: true
       });
     } catch (error) {
