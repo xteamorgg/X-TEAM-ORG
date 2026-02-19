@@ -110,11 +110,10 @@ function renderServers(containerId, servers) {
       ? `<img src="${server.icon}" alt="${server.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;" onerror="this.style.display='none'; this.parentElement.textContent='🔍';">`
       : server.icon || '🔍';
     
-    const onlineInfoHtml = server.inviteCode 
-      ? `<div class="server-online-info" data-invite="${server.inviteCode}">
-           <span class="loading">Carregando...</span>
-         </div>`
-      : '';
+    // Sempre mostrar placeholder para informações
+    const onlineInfoHtml = `<div class="server-online-info" data-server-id="${server.id}">
+      <span class="loading">Buscando informações...</span>
+    </div>`;
     
     return `
       <div class="server-card" data-server-id="${server.id}">
@@ -131,12 +130,13 @@ function renderServers(containerId, servers) {
     `;
   }).join('');
   
-  // Buscar informações de membros online para servidores com invite
+  // Buscar informações para todos os servidores
   servers.forEach(server => {
     if (server.inviteCode) {
-      fetchServerOnlineInfo(server.inviteCode);
+      // Prioridade 1: Usar convite se disponível
+      fetchServerOnlineInfo(server.inviteCode, server.id);
     } else {
-      // Tentar buscar por ID usando API da Loritta
+      // Prioridade 2: Tentar buscar por ID usando API da Loritta
       fetchServerInfoById(server.id);
     }
   });
@@ -148,39 +148,56 @@ async function fetchServerInfoById(serverId) {
     const response = await fetch(`${API_URL}/server-info-by-id/${serverId}`);
     
     if (!response.ok) {
-      return; // Falhou, não mostrar nada
+      showNoInfoMessage(serverId);
+      return;
     }
     
     const data = await response.json();
-    updateServerInfoById(serverId, data);
+    updateServerInfo(serverId, data, 'loritta');
   } catch (error) {
     console.error('Erro ao buscar info do servidor por ID:', error);
+    showNoInfoMessage(serverId);
   }
 }
 
-// Atualizar informações do servidor buscado por ID
-function updateServerInfoById(serverId, data) {
-  const serverCard = document.querySelector(`[data-server-id="${serverId}"]`);
+// Mostrar mensagem quando não há informações disponíveis
+function showNoInfoMessage(serverId) {
+  const element = document.querySelector(`[data-server-id="${serverId}"] .server-online-info`);
   
-  if (!serverCard) return;
+  if (!element) return;
+  
+  element.innerHTML = `
+    <div class="no-info-message">
+      <span class="no-info-icon">ℹ️</span>
+      <span class="no-info-text">Sem informações disponíveis</span>
+      <span class="no-info-hint">Adicione o bot Loritta ou use um código de convite</span>
+    </div>
+  `;
+}
+
+// Atualizar informações do servidor (unificado para invite e loritta)
+function updateServerInfo(serverId, data, source) {
+  const serverCard = document.querySelector(`[data-server-id="${serverId}"]`);
+  const infoElement = document.querySelector(`[data-server-id="${serverId}"] .server-online-info`);
+  
+  if (!infoElement) return;
   
   // Adicionar banner se existir
-  if (data.banner) {
-    const bannerHtml = `<div class="server-banner-placeholder">
-      <img src="${data.banner}" alt="Banner" class="server-banner">
-    </div>`;
-    serverCard.insertAdjacentHTML('afterbegin', bannerHtml);
+  if (serverCard && data.banner) {
+    const existingBanner = serverCard.querySelector('.server-banner-placeholder');
+    if (!existingBanner) {
+      const bannerHtml = `<div class="server-banner-placeholder">
+        <img src="${data.banner}" alt="Banner" class="server-banner">
+      </div>`;
+      serverCard.insertAdjacentHTML('afterbegin', bannerHtml);
+    }
   }
   
-  // Buscar elemento de info
-  const serverInfo = serverCard.querySelector('.server-info');
-  if (!serverInfo) return;
+  // Montar HTML com informações
+  let infoHtml = '';
   
-  // Criar div para informações extras
-  let infoHtml = `<div class="server-online-info">`;
-  
-  // Adicionar membros online
-  if (data.memberCount > 0) {
+  // Membros online e total (SEMPRE mostrar se disponível)
+  if (data.memberCount > 0 || data.onlineCount > 0) {
     infoHtml += `
       <div class="online-stats">
         <span class="stat">
@@ -189,13 +206,13 @@ function updateServerInfoById(serverId, data) {
         </span>
         <span class="stat">
           <span class="stat-dot"></span>
-          ${data.memberCount} membros
+          ${data.memberCount || 0} membros
         </span>
       </div>
     `;
   }
   
-  // Adicionar tag do servidor
+  // Tag do servidor (vanity URL)
   if (data.vanityUrlCode) {
     infoHtml += `
       <div class="server-vanity">
@@ -205,21 +222,35 @@ function updateServerInfoById(serverId, data) {
     `;
   }
   
-  // Adicionar dono do servidor
-  if (data.owner) {
+  // Dono do servidor (apenas Loritta)
+  if (source === 'loritta' && data.owner) {
     const ownerTag = data.owner.discriminator && data.owner.discriminator !== '0'
       ? `${data.owner.username}#${data.owner.discriminator}`
       : `@${data.owner.username}`;
     
     infoHtml += `
       <div class="server-owner">
-        <span class="owner-label">Dono:</span>
+        <span class="owner-label">👑 Dono:</span>
         <span class="owner-name">${ownerTag}</span>
       </div>
     `;
   }
   
-  // Adicionar descrição
+  // Quem criou o convite (apenas invite)
+  if (source === 'invite' && data.inviter) {
+    const inviterTag = data.inviter.discriminator !== '0' 
+      ? `${data.inviter.username}#${data.inviter.discriminator}`
+      : `@${data.inviter.username}`;
+    
+    infoHtml += `
+      <div class="server-inviter">
+        <span class="inviter-label">Convite por:</span>
+        <span class="inviter-name">${inviterTag}</span>
+      </div>
+    `;
+  }
+  
+  // Descrição
   if (data.description) {
     infoHtml += `
       <div class="server-description">
@@ -228,7 +259,7 @@ function updateServerInfoById(serverId, data) {
     `;
   }
   
-  // Adicionar badges
+  // Badges de features
   if (data.features && data.features.length > 0) {
     const importantFeatures = data.features.filter(f => 
       ['VERIFIED', 'PARTNERED', 'COMMUNITY', 'DISCOVERABLE'].includes(f)
@@ -251,53 +282,25 @@ function updateServerInfoById(serverId, data) {
     }
   }
   
-  infoHtml += `</div>`;
-  
-  // Adicionar ao DOM
-  serverInfo.insertAdjacentHTML('beforeend', infoHtml);
+  infoElement.innerHTML = infoHtml;
 }
 
 // Buscar informações de membros online via invite
-async function fetchServerOnlineInfo(inviteCode) {
+async function fetchServerOnlineInfo(inviteCode, serverId) {
   try {
     const response = await fetch(`${API_URL}/server-info/${inviteCode}`);
     
     if (!response.ok) {
-      updateOnlineInfo(inviteCode, null);
+      showNoInfoMessage(serverId);
       return;
     }
     
     const data = await response.json();
-    updateOnlineInfo(inviteCode, data);
+    updateServerInfo(serverId, data, 'invite');
   } catch (error) {
     console.error('Erro ao buscar info do servidor:', error);
-    updateOnlineInfo(inviteCode, null);
+    showNoInfoMessage(serverId);
   }
-}
-
-// Atualizar informações de membros online no DOM
-function updateOnlineInfo(inviteCode, data) {
-  const element = document.querySelector(`[data-invite="${inviteCode}"]`);
-  
-  if (!element) return;
-  
-  if (!data) {
-    element.innerHTML = '<span class="error">Convite inválido</span>';
-    return;
-  }
-  
-  element.innerHTML = `
-    <div class="online-stats">
-      <span class="stat">
-        <span class="stat-dot online"></span>
-        ${data.onlineCount} online
-      </span>
-      <span class="stat">
-        <span class="stat-dot"></span>
-        ${data.memberCount} membros
-      </span>
-    </div>
-  `;
 }
 
 function renderMembers(containerId, members) {
