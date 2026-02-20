@@ -1,6 +1,24 @@
 import './admin.js';
 import { config } from './config.js';
 
+// Funções para gerenciar dados localmente
+function getLocalServers(type) {
+  const key = `${type}_servers`;
+  const data = localStorage.getItem(key);
+  return data ? JSON.parse(data) : [];
+}
+
+function saveLocalServers(type, servers) {
+  const key = `${type}_servers`;
+  localStorage.setItem(key, JSON.stringify(servers));
+}
+
+function addLocalServer(type, server) {
+  const servers = getLocalServers(type);
+  servers.push(server);
+  saveLocalServers(type, servers);
+}
+
 // Função para buscar informações do servidor pelo ID
 async function fetchServerInfo(serverId) {
   try {
@@ -87,29 +105,31 @@ document.getElementById('suspicious-form').addEventListener('submit', async (e) 
   const status = document.getElementById('suspicious-status').value.trim();
   const icon = document.getElementById('suspicious-icon').value.trim();
   
+  const server = {
+    id: serverId,
+    name: serverName,
+    status: status,
+    icon: icon || '🔍'
+  };
+  
+  // Salvar localmente primeiro
+  addLocalServer('suspicious', server);
+  
+  // Tentar sincronizar com API (opcional)
   try {
-    const response = await fetch(`${config.apiUrl}/servers/suspicious`, {
+    await fetch(`${config.apiUrl}/servers/suspicious`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        id: serverId,
-        name: serverName,
-        status: status,
-        icon: icon || '🔍'
-      })
+      body: JSON.stringify(server)
     });
-    
-    if (response.ok) {
-      showSuccess('suspicious', `✅ Servidor "${serverName}" adicionado aos suspeitos!`);
-      e.target.reset();
-    } else {
-      throw new Error('Erro ao adicionar servidor');
-    }
   } catch (error) {
-    showError('suspicious', `❌ Erro: ${error.message}`);
+    console.log('API não disponível, servidor salvo localmente');
   }
+  
+  showSuccess('suspicious', `✅ Servidor "${serverName}" adicionado aos suspeitos!`);
+  e.target.reset();
 });
 
 // Adicionar servidor investigado
@@ -121,29 +141,31 @@ document.getElementById('investigated-form').addEventListener('submit', async (e
   const status = document.getElementById('investigated-status').value.trim();
   const icon = document.getElementById('investigated-icon').value.trim();
   
+  const server = {
+    id: serverId,
+    name: serverName,
+    status: status,
+    icon: icon || '✅'
+  };
+  
+  // Salvar localmente primeiro
+  addLocalServer('investigated', server);
+  
+  // Tentar sincronizar com API (opcional)
   try {
-    const response = await fetch(`${config.apiUrl}/servers/investigated`, {
+    await fetch(`${config.apiUrl}/servers/investigated`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        id: serverId,
-        name: serverName,
-        status: status,
-        icon: icon || '✅'
-      })
+      body: JSON.stringify(server)
     });
-    
-    if (response.ok) {
-      showSuccess('investigated', `✅ Servidor "${serverName}" adicionado aos investigados!`);
-      e.target.reset();
-    } else {
-      throw new Error('Erro ao adicionar servidor');
-    }
   } catch (error) {
-    showError('investigated', `❌ Erro: ${error.message}`);
+    console.log('API não disponível, servidor salvo localmente');
   }
+  
+  showSuccess('investigated', `✅ Servidor "${serverName}" adicionado aos investigados!`);
+  e.target.reset();
 });
 
 // Adicionar servidor desativado
@@ -155,27 +177,119 @@ document.getElementById('terminated-form').addEventListener('submit', async (e) 
   const status = document.getElementById('terminated-status').value.trim();
   const icon = document.getElementById('terminated-icon').value.trim();
   
+  const server = {
+    id: serverId,
+    name: serverName,
+    status: status,
+    icon: icon || '❌'
+  };
+  
+  // Salvar localmente primeiro
+  addLocalServer('terminated', server);
+  
+  // Tentar sincronizar com API (opcional)
   try {
-    const response = await fetch(`${config.apiUrl}/servers/terminated`, {
+    await fetch(`${config.apiUrl}/servers/terminated`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        id: serverId,
-        name: serverName,
-        status: status,
-        icon: icon || '❌'
-      })
+      body: JSON.stringify(server)
     });
-    
-    if (response.ok) {
-      showSuccess('terminated', `✅ Servidor "${serverName}" adicionado aos desativados!`);
-      e.target.reset();
-    } else {
-      throw new Error('Erro ao adicionar servidor');
-    }
   } catch (error) {
-    showError('terminated', `❌ Erro: ${error.message}`);
+    console.log('API não disponível, servidor salvo localmente');
   }
+  
+  showSuccess('terminated', `✅ Servidor "${serverName}" adicionado aos desativados!`);
+  e.target.reset();
+});
+
+// ========== GERENCIAR MEMBROS ==========
+
+// Adicionar Leader
+document.getElementById('leaders-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const nick = document.getElementById('leaders-nick').value.trim();
+  const avatar = document.getElementById('leaders-avatar').value.trim();
+  
+  const member = {
+    nick: nick,
+    avatar: avatar,
+    role: 'X LEADERS – FOUNDERS'
+  };
+  
+  // Salvar localmente
+  const members = getLocalServers('leaders_members');
+  members.push(member);
+  saveLocalServers('leaders_members', members);
+  
+  showSuccess('leaders', `✅ Membro "${nick}" adicionado aos Leaders!`);
+  e.target.reset();
+});
+
+// Adicionar Investigador
+document.getElementById('investigators-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const nick = document.getElementById('investigators-nick').value.trim();
+  const avatar = document.getElementById('investigators-avatar').value.trim();
+  
+  const member = {
+    nick: nick,
+    avatar: avatar,
+    role: 'X INVESTIGADORES'
+  };
+  
+  // Salvar localmente
+  const members = getLocalServers('investigators_members');
+  members.push(member);
+  saveLocalServers('investigators_members', members);
+  
+  showSuccess('investigators', `✅ Membro "${nick}" adicionado aos Investigadores!`);
+  e.target.reset();
+});
+
+// Adicionar Agent
+document.getElementById('agents-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const nick = document.getElementById('agents-nick').value.trim();
+  const avatar = document.getElementById('agents-avatar').value.trim();
+  
+  const member = {
+    nick: nick,
+    avatar: avatar,
+    role: 'X AGENTS'
+  };
+  
+  // Salvar localmente
+  const members = getLocalServers('agents_members');
+  members.push(member);
+  saveLocalServers('agents_members', members);
+  
+  showSuccess('agents', `✅ Membro "${nick}" adicionado aos Agents!`);
+  e.target.reset();
+});
+
+// Adicionar Newbie
+document.getElementById('newbies-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const nick = document.getElementById('newbies-nick').value.trim();
+  const avatar = document.getElementById('newbies-avatar').value.trim();
+  
+  const member = {
+    nick: nick,
+    avatar: avatar,
+    role: 'X NEWBIES'
+  };
+  
+  // Salvar localmente
+  const members = getLocalServers('newbies_members');
+  members.push(member);
+  saveLocalServers('newbies_members', members);
+  
+  showSuccess('newbies', `✅ Membro "${nick}" adicionado aos Newbies!`);
+  e.target.reset();
 });

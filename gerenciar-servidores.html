@@ -359,6 +359,127 @@
         <button type="submit" class="submit-btn">Adicionar Servidor Desativado</button>
       </form>
     </div>
+
+    <!-- Gerenciar Membros -->
+    <div class="page-header" style="margin-top: 60px;">
+      <div class="page-header-content">
+        <h1 class="page-title">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          Gerenciar Membros
+        </h1>
+        <p class="page-description">Adicione membros aos cargos da equipe</p>
+      </div>
+    </div>
+
+    <!-- Leaders -->
+    <div class="form-container">
+      <div class="form-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        <h2>X LEADERS – FOUNDERS</h2>
+      </div>
+      <div id="leaders-success" class="success-message"></div>
+      <div id="leaders-error" class="error-message"></div>
+      <form id="leaders-form">
+        <div class="form-group">
+          <label for="leaders-nick">Nickname *</label>
+          <input type="text" id="leaders-nick" required placeholder="Nome do membro">
+        </div>
+
+        <div class="form-group">
+          <label for="leaders-avatar">URL do Avatar *</label>
+          <input type="url" id="leaders-avatar" required placeholder="https://cdn.discordapp.com/avatars/...">
+        </div>
+
+        <button type="submit" class="submit-btn">Adicionar Leader</button>
+      </form>
+    </div>
+
+    <!-- Investigators -->
+    <div class="form-container">
+      <div class="form-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        <h2>X INVESTIGADORES</h2>
+      </div>
+      <div id="investigators-success" class="success-message"></div>
+      <div id="investigators-error" class="error-message"></div>
+      <form id="investigators-form">
+        <div class="form-group">
+          <label for="investigators-nick">Nickname *</label>
+          <input type="text" id="investigators-nick" required placeholder="Nome do membro">
+        </div>
+
+        <div class="form-group">
+          <label for="investigators-avatar">URL do Avatar *</label>
+          <input type="url" id="investigators-avatar" required placeholder="https://cdn.discordapp.com/avatars/...">
+        </div>
+
+        <button type="submit" class="submit-btn">Adicionar Investigador</button>
+      </form>
+    </div>
+
+    <!-- Agents -->
+    <div class="form-container">
+      <div class="form-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="8.5" cy="7" r="4"/>
+          <polyline points="17 11 19 13 23 9"/>
+        </svg>
+        <h2>X AGENTS</h2>
+      </div>
+      <div id="agents-success" class="success-message"></div>
+      <div id="agents-error" class="error-message"></div>
+      <form id="agents-form">
+        <div class="form-group">
+          <label for="agents-nick">Nickname *</label>
+          <input type="text" id="agents-nick" required placeholder="Nome do membro">
+        </div>
+
+        <div class="form-group">
+          <label for="agents-avatar">URL do Avatar *</label>
+          <input type="url" id="agents-avatar" required placeholder="https://cdn.discordapp.com/avatars/...">
+        </div>
+
+        <button type="submit" class="submit-btn">Adicionar Agent</button>
+      </form>
+    </div>
+
+    <!-- Newbies -->
+    <div class="form-container">
+      <div class="form-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="8.5" cy="7" r="4"/>
+          <path d="M20 8v6M23 11h-6"/>
+        </svg>
+        <h2>X NEWBIES</h2>
+      </div>
+      <div id="newbies-success" class="success-message"></div>
+      <div id="newbies-error" class="error-message"></div>
+      <form id="newbies-form">
+        <div class="form-group">
+          <label for="newbies-nick">Nickname *</label>
+          <input type="text" id="newbies-nick" required placeholder="Nome do membro">
+        </div>
+
+        <div class="form-group">
+          <label for="newbies-avatar">URL do Avatar *</label>
+          <input type="url" id="newbies-avatar" required placeholder="https://cdn.discordapp.com/avatars/...">
+        </div>
+
+        <button type="submit" class="submit-btn">Adicionar Newbie</button>
+      </form>
+    </div>
   </main>
 
   <script type="module" src="./gerenciar-servidores.js"></script>

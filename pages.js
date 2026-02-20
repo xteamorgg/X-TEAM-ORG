@@ -1,6 +1,13 @@
 import './admin.js';
 import { config } from './config.js';
 
+// Funções para gerenciar dados localmente
+function getLocalServers(type) {
+  const key = `${type}_servers`;
+  const data = localStorage.getItem(key);
+  return data ? JSON.parse(data) : [];
+}
+
 // Registrar visita (sempre, mesmo IP)
 async function registerVisit() {
   // Verificar se já registrou visita nesta sessão
@@ -79,6 +86,7 @@ function updateVisitorCount(count) {
 // Fetch and render data
 async function fetchData() {
   try {
+    // Tentar buscar da API
     const response = await fetch(config.apiUrl);
     const data = await response.json();
     
@@ -94,19 +102,66 @@ async function fetchData() {
     const path = window.location.pathname;
     
     if (path.includes('suspeitos')) {
-      renderServers('suspicious-servers', data.suspiciousServers);
+      // Combinar dados locais com API
+      const localServers = getLocalServers('suspicious');
+      const apiServers = data.suspiciousServers || [];
+      const allServers = [...localServers, ...apiServers];
+      // Remover duplicatas por ID
+      const uniqueServers = allServers.filter((server, index, self) =>
+        index === self.findIndex((s) => s.id === server.id)
+      );
+      renderServers('suspicious-servers', uniqueServers);
     } else if (path.includes('investigados')) {
-      renderServers('investigated-servers', data.investigatedServers);
+      const localServers = getLocalServers('investigated');
+      const apiServers = data.investigatedServers || [];
+      const allServers = [...localServers, ...apiServers];
+      const uniqueServers = allServers.filter((server, index, self) =>
+        index === self.findIndex((s) => s.id === server.id)
+      );
+      renderServers('investigated-servers', uniqueServers);
     } else if (path.includes('desativados')) {
-      renderServers('terminated-servers', data.terminatedServers);
+      const localServers = getLocalServers('terminated');
+      const apiServers = data.terminatedServers || [];
+      const allServers = [...localServers, ...apiServers];
+      const uniqueServers = allServers.filter((server, index, self) =>
+        index === self.findIndex((s) => s.id === server.id)
+      );
+      renderServers('terminated-servers', uniqueServers);
     } else if (path.includes('about')) {
-      renderMembers('leaders', data.members.leaders);
-      renderMembers('investigators', data.members.investigators);
-      renderMembers('agents', data.members.agents);
-      renderMembers('newbies', data.members.newbies);
+      // Combinar membros locais com API
+      const localLeaders = getLocalServers('leaders_members');
+      const localInvestigators = getLocalServers('investigators_members');
+      const localAgents = getLocalServers('agents_members');
+      const localNewbies = getLocalServers('newbies_members');
+      
+      const apiLeaders = data.members?.leaders || [];
+      const apiInvestigators = data.members?.investigators || [];
+      const apiAgents = data.members?.agents || [];
+      const apiNewbies = data.members?.newbies || [];
+      
+      renderMembers('leaders', [...localLeaders, ...apiLeaders]);
+      renderMembers('investigators', [...localInvestigators, ...apiInvestigators]);
+      renderMembers('agents', [...localAgents, ...apiAgents]);
+      renderMembers('newbies', [...localNewbies, ...apiNewbies]);
     }
   } catch (error) {
-    console.error('Erro ao carregar dados:', error);
+    console.error('Erro ao carregar dados da API, usando dados locais:', error);
+    
+    // Se API falhar, usar apenas dados locais
+    const path = window.location.pathname;
+    
+    if (path.includes('suspeitos')) {
+      renderServers('suspicious-servers', getLocalServers('suspicious'));
+    } else if (path.includes('investigados')) {
+      renderServers('investigated-servers', getLocalServers('investigated'));
+    } else if (path.includes('desativados')) {
+      renderServers('terminated-servers', getLocalServers('terminated'));
+    } else if (path.includes('about')) {
+      renderMembers('leaders', getLocalServers('leaders_members'));
+      renderMembers('investigators', getLocalServers('investigators_members'));
+      renderMembers('agents', getLocalServers('agents_members'));
+      renderMembers('newbies', getLocalServers('newbies_members'));
+    }
   }
 }
 
