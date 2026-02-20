@@ -3,9 +3,50 @@ import { config } from './config.js';
 
 // Funções para gerenciar dados localmente
 function getLocalServers(type) {
-  const key = `${type}_servers`;
+  // Para membros, não adiciona _servers
+  const key = type.includes('_members') || type.includes('_roles') ? type : `${type}_servers`;
   const data = localStorage.getItem(key);
   return data ? JSON.parse(data) : [];
+}
+
+// Carregar dados do arquivo JSON do GitHub
+async function loadGitHubData() {
+  try {
+    const response = await fetch('./members-data.json?t=' + Date.now());
+    if (response.ok) {
+      return await response.json();
+    }
+  } catch (error) {
+    console.log('Usando apenas dados locais');
+  }
+  return null;
+}
+
+// Combinar dados do GitHub com localStorage
+function combineData(githubData, localKey) {
+  const localData = getLocalServers(localKey);
+  if (!githubData) return localData;
+  
+  const githubArray = githubData[localKey] || [];
+  
+  // Combinar e remover duplicatas
+  const combined = [...githubArray, ...localData];
+  
+  // Para membros, remover duplicatas por nick
+  if (localKey.includes('_members')) {
+    return combined.filter((item, index, self) =>
+      index === self.findIndex((t) => t.nick === item.nick)
+    );
+  }
+  
+  // Para servidores, remover duplicatas por ID
+  if (item => item.id) {
+    return combined.filter((item, index, self) =>
+      index === self.findIndex((t) => t.id === item.id)
+    );
+  }
+  
+  return combined;
 }
 
 // Registrar visita (sempre, mesmo IP)
@@ -86,6 +127,9 @@ function updateVisitorCount(count) {
 // Fetch and render data
 async function fetchData() {
   try {
+    // Carregar dados do GitHub primeiro
+    const githubData = await loadGitHubData();
+    
     // Tentar buscar da API
     const response = await fetch(config.apiUrl);
     const data = await response.json();
@@ -102,49 +146,24 @@ async function fetchData() {
     const path = window.location.pathname;
     
     if (path.includes('suspeitos')) {
-      // Combinar dados locais com API
-      const localServers = getLocalServers('suspicious');
-      const apiServers = data.suspiciousServers || [];
-      const allServers = [...localServers, ...apiServers];
-      // Remover duplicatas por ID
-      const uniqueServers = allServers.filter((server, index, self) =>
-        index === self.findIndex((s) => s.id === server.id)
-      );
-      renderServers('suspicious-servers', uniqueServers);
+      const servers = combineData(githubData, 'suspicious_servers');
+      renderServers('suspicious-servers', servers);
     } else if (path.includes('investigados')) {
-      const localServers = getLocalServers('investigated');
-      const apiServers = data.investigatedServers || [];
-      const allServers = [...localServers, ...apiServers];
-      const uniqueServers = allServers.filter((server, index, self) =>
-        index === self.findIndex((s) => s.id === server.id)
-      );
-      renderServers('investigated-servers', uniqueServers);
+      const servers = combineData(githubData, 'investigated_servers');
+      renderServers('investigated-servers', servers);
     } else if (path.includes('desativados')) {
-      const localServers = getLocalServers('terminated');
-      const apiServers = data.terminatedServers || [];
-      const allServers = [...localServers, ...apiServers];
-      const uniqueServers = allServers.filter((server, index, self) =>
-        index === self.findIndex((s) => s.id === server.id)
-      );
-      renderServers('terminated-servers', uniqueServers);
+      const servers = combineData(githubData, 'terminated_servers');
+      renderServers('terminated-servers', servers);
     } else if (path.includes('about')) {
-      // Combinar membros locais com API
-      const localLeaders = getLocalServers('leaders_members');
-      const localInvestigators = getLocalServers('investigators_members');
-      const localAgentGirls = getLocalServers('agent_girls_members');
-      const localAgents = getLocalServers('agents_members');
-      const localNewbies = getLocalServers('newbies_members');
+      // Carregar membros do GitHub + localStorage
+      renderMembers('leaders', combineData(githubData, 'leaders_members'));
+      renderMembers('investigators', combineData(githubData, 'investigators_members'));
+      renderMembers('agent-girls', combineData(githubData, 'agent_girls_members'));
+      renderMembers('agents', combineData(githubData, 'agents_members'));
+      renderMembers('newbies', combineData(githubData, 'newbies_members'));
       
-      const apiLeaders = data.members?.leaders || [];
-      const apiInvestigators = data.members?.investigators || [];
-      const apiAgents = data.members?.agents || [];
-      const apiNewbies = data.members?.newbies || [];
-      
-      renderMembers('leaders', [...localLeaders, ...apiLeaders]);
-      renderMembers('investigators', [...localInvestigators, ...apiInvestigators]);
-      renderMembers('agent-girls', localAgentGirls);
-      renderMembers('agents', [...localAgents, ...apiAgents]);
-      renderMembers('newbies', [...localNewbies, ...apiNewbies]);
+      // Renderizar cargos personalizados
+      renderCustomRoles();
     }
   } catch (error) {
     console.error('Erro ao carregar dados da API, usando dados locais:', error);

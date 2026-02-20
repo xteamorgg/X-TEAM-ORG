@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -20,6 +20,17 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+      
+    - name: Ativar Modo Manutenção
+      run: |
+        echo '{"maintenance":true,"message":"Servidor em atualização. Aguarde 10 segundos...","duration":10}' > maintenance.json
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add maintenance.json
+        git diff --staged --quiet || git commit -m "🔧 Ativa modo manutenção [skip ci]"
+        git push || echo "Nada para commitar"
       
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -51,3 +62,20 @@ jobs:
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
+    
+    - name: Checkout para desativar manutenção
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Aguardar 10 segundos
+      run: sleep 10
+    
+    - name: Desativar Modo Manutenção
+      run: |
+        echo '{"maintenance":false,"message":"Servidor em atualização. Aguarde 10 segundos...","duration":10}' > maintenance.json
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add maintenance.json
+        git diff --staged --quiet || git commit -m "✅ Desativa modo manutenção [skip ci]"
+        git push || echo "Nada para commitar"
