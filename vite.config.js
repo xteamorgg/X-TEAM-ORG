@@ -15,7 +15,8 @@ export default defineConfig({
         desativados: './desativados.html',
         about: './about.html',
         xia: './xia.html',
-        xdox: './xdox.html'
+        xdox: './xdox.html',
+        'gerenciar-servidores': './gerenciar-servidores.html'
       }
     }
   }
