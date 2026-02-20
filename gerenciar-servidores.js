@@ -128,7 +128,7 @@ document.getElementById('suspicious-form').addEventListener('submit', async (e) 
     console.log('API não disponível, servidor salvo localmente');
   }
   
-  showSuccess('suspicious', `✅ Servidor "${serverName}" adicionado aos suspeitos!`);
+  showSuccess('suspicious', `✅ Servidor "${serverName}" adicionado aos suspeitos! Clique em "Sincronizar Dados" para salvar permanentemente.`);
   e.target.reset();
   renderManageList();
 });
@@ -165,7 +165,7 @@ document.getElementById('investigated-form').addEventListener('submit', async (e
     console.log('API não disponível, servidor salvo localmente');
   }
   
-  showSuccess('investigated', `✅ Servidor "${serverName}" adicionado aos investigados!`);
+  showSuccess('investigated', `✅ Servidor "${serverName}" adicionado aos investigados! Clique em "Sincronizar Dados" para salvar permanentemente.`);
   e.target.reset();
   renderManageList();
 });
@@ -202,7 +202,7 @@ document.getElementById('terminated-form').addEventListener('submit', async (e) 
     console.log('API não disponível, servidor salvo localmente');
   }
   
-  showSuccess('terminated', `✅ Servidor "${serverName}" adicionado aos desativados!`);
+  showSuccess('terminated', `✅ Servidor "${serverName}" adicionado aos desativados! Clique em "Sincronizar Dados" para salvar permanentemente.`);
   e.target.reset();
   renderManageList();
 });
@@ -299,7 +299,7 @@ document.getElementById('custom-member-form').addEventListener('submit', (e) => 
   members.push(member);
   saveLocalServers(roleId, members);
   
-  showSuccess('custom-member', `✅ Membro "${nick}" adicionado ao cargo ${roleName}!`);
+  showSuccess('custom-member', `✅ Membro "${nick}" adicionado ao cargo ${roleName}! Clique em "Sincronizar Dados" para salvar permanentemente.`);
   e.target.reset();
   renderManageList();
 });
@@ -325,7 +325,7 @@ document.getElementById('leaders-form').addEventListener('submit', async (e) => 
   members.push(member);
   saveLocalServers('leaders_members', members);
   
-  showSuccess('leaders', `✅ Membro "${nick}" adicionado aos Leaders!`);
+  showSuccess('leaders', `✅ Membro "${nick}" adicionado aos Leaders! Clique em "Sincronizar Dados" para salvar permanentemente.`);
   e.target.reset();
   renderManageList();
 });
@@ -348,7 +348,7 @@ document.getElementById('investigators-form').addEventListener('submit', async (
   members.push(member);
   saveLocalServers('investigators_members', members);
   
-  showSuccess('investigators', `✅ Membro "${nick}" adicionado aos Investigadores!`);
+  showSuccess('investigators', `✅ Membro "${nick}" adicionado aos Investigadores! Clique em "Sincronizar Dados" para salvar permanentemente.`);
   e.target.reset();
   renderManageList();
 });
@@ -371,7 +371,7 @@ document.getElementById('agent-girls-form').addEventListener('submit', async (e)
   members.push(member);
   saveLocalServers('agent_girls_members', members);
   
-  showSuccess('agent-girls', `✅ Membro "${nick}" adicionado às Agent Girls!`);
+  showSuccess('agent-girls', `✅ Membro "${nick}" adicionado às Agent Girls! Clique em "Sincronizar Dados" para salvar permanentemente.`);
   e.target.reset();
   renderManageList();
 });
@@ -394,7 +394,7 @@ document.getElementById('agents-form').addEventListener('submit', async (e) => {
   members.push(member);
   saveLocalServers('agents_members', members);
   
-  showSuccess('agents', `✅ Membro "${nick}" adicionado aos Agents!`);
+  showSuccess('agents', `✅ Membro "${nick}" adicionado aos Agents! Clique em "Sincronizar Dados" para salvar permanentemente.`);
   e.target.reset();
   renderManageList();
 });
@@ -417,7 +417,7 @@ document.getElementById('newbies-form').addEventListener('submit', async (e) => 
   members.push(member);
   saveLocalServers('newbies_members', members);
   
-  showSuccess('newbies', `✅ Membro "${nick}" adicionado aos Newbies!`);
+  showSuccess('newbies', `✅ Membro "${nick}" adicionado aos Newbies! Clique em "Sincronizar Dados" para salvar permanentemente.`);
   e.target.reset();
   renderManageList();
 });

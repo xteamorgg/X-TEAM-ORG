@@ -1,5 +1,1 @@
-{
-  "maintenance": false,
-  "message": "Servidor em manutenção. Aguarde 10 segundos...",
-  "duration": 10
-}
+{"maintenance":true,"message":"Servidor em atualização. Aguarde 10 segundos...","duration":10}
