@@ -1,5 +1,6 @@
 import './admin.js';
-import { config } from './config.js';
+
+const API_URL = 'https://x-team-org.onrender.com';
 
 // Funções para gerenciar dados localmente
 function getLocalServers(type) {
@@ -65,7 +66,7 @@ async function registerVisit() {
   
   // Tentar registrar na API também
   try {
-    const response = await fetch(`${config.apiUrl}/visit`, {
+    const response = await fetch(`${API_URL}/api/visit`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -95,7 +96,7 @@ async function fetchVisitorCount() {
   const localCount = parseInt(localStorage.getItem('visitor_count') || '0');
   
   try {
-    const response = await fetch(`${config.apiUrl}/data`);
+    const response = await fetch(`${API_URL}/api/data`);
     const data = await response.json();
     if (data.visitors) {
       const finalCount = Math.max(localCount, data.visitors.total || 0);
@@ -136,20 +137,28 @@ async function fetchData() {
     
     // Tentar buscar da API também
     try {
-      const response = await fetch(config.apiUrl);
+      const response = await fetch(`${API_URL}/api/data`);
       const data = await response.json();
       
       if (data.discordInvite) {
-        document.getElementById('discord-link').href = data.discordInvite;
+        const discordLink = document.getElementById('discord-link');
+        if (discordLink) {
+          discordLink.href = data.discordInvite;
+        }
       }
     } catch (error) {
       console.log('API não disponível, usando dados locais');
     }
     
     // Update stats com dados combinados
-    document.getElementById('stat-suspicious').textContent = suspiciousServers.length;
-    document.getElementById('stat-investigated').textContent = investigatedServers.length;
-    document.getElementById('stat-terminated').textContent = terminatedServers.length;
+    const statSuspicious = document.getElementById('stat-suspicious');
+    const statInvestigated = document.getElementById('stat-investigated');
+    const statTerminated = document.getElementById('stat-terminated');
+    const statMembers = document.getElementById('stat-members');
+    
+    if (statSuspicious) statSuspicious.textContent = suspiciousServers.length;
+    if (statInvestigated) statInvestigated.textContent = investigatedServers.length;
+    if (statTerminated) statTerminated.textContent = terminatedServers.length;
     
     // Count total members
     const totalMembers = 
@@ -159,7 +168,7 @@ async function fetchData() {
       agentsMembers.length +
       newbiesMembers.length;
     
-    document.getElementById('stat-members').textContent = totalMembers;
+    if (statMembers) statMembers.textContent = totalMembers;
     
   } catch (error) {
     console.error('Erro ao carregar dados:', error);
@@ -169,9 +178,14 @@ async function fetchData() {
     const investigatedServers = getLocalServers('investigated');
     const terminatedServers = getLocalServers('terminated');
     
-    document.getElementById('stat-suspicious').textContent = suspiciousServers.length;
-    document.getElementById('stat-investigated').textContent = investigatedServers.length;
-    document.getElementById('stat-terminated').textContent = terminatedServers.length;
+    const statSuspicious = document.getElementById('stat-suspicious');
+    const statInvestigated = document.getElementById('stat-investigated');
+    const statTerminated = document.getElementById('stat-terminated');
+    const statMembers = document.getElementById('stat-members');
+    
+    if (statSuspicious) statSuspicious.textContent = suspiciousServers.length;
+    if (statInvestigated) statInvestigated.textContent = investigatedServers.length;
+    if (statTerminated) statTerminated.textContent = terminatedServers.length;
     
     const totalMembers = 
       getLocalServers('leaders_members').length +
@@ -180,7 +194,7 @@ async function fetchData() {
       getLocalServers('agents_members').length +
       getLocalServers('newbies_members').length;
     
-    document.getElementById('stat-members').textContent = totalMembers;
+    if (statMembers) statMembers.textContent = totalMembers;
   }
 }
 
