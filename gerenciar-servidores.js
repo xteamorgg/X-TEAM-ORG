@@ -130,6 +130,7 @@ document.getElementById('suspicious-form').addEventListener('submit', async (e) 
   
   showSuccess('suspicious', `✅ Servidor "${serverName}" adicionado aos suspeitos!`);
   e.target.reset();
+  renderManageList();
 });
 
 // Adicionar servidor investigado
@@ -166,6 +167,7 @@ document.getElementById('investigated-form').addEventListener('submit', async (e
   
   showSuccess('investigated', `✅ Servidor "${serverName}" adicionado aos investigados!`);
   e.target.reset();
+  renderManageList();
 });
 
 // Adicionar servidor desativado
@@ -202,6 +204,7 @@ document.getElementById('terminated-form').addEventListener('submit', async (e) 
   
   showSuccess('terminated', `✅ Servidor "${serverName}" adicionado aos desativados!`);
   e.target.reset();
+  renderManageList();
 });
 
 // ========== GERENCIAR MEMBROS ==========
@@ -271,6 +274,7 @@ document.getElementById('role-form').addEventListener('submit', (e) => {
   e.target.reset();
   document.getElementById('role-color').value = '#a855f7';
   document.getElementById('role-order').value = '5';
+  renderManageList();
 });
 
 // Adicionar membro a cargo personalizado
@@ -323,6 +327,7 @@ document.getElementById('leaders-form').addEventListener('submit', async (e) => 
   
   showSuccess('leaders', `✅ Membro "${nick}" adicionado aos Leaders!`);
   e.target.reset();
+  renderManageList();
 });
 
 // Adicionar Investigador
@@ -345,6 +350,7 @@ document.getElementById('investigators-form').addEventListener('submit', async (
   
   showSuccess('investigators', `✅ Membro "${nick}" adicionado aos Investigadores!`);
   e.target.reset();
+  renderManageList();
 });
 
 // Adicionar Agent Girl
@@ -367,6 +373,7 @@ document.getElementById('agent-girls-form').addEventListener('submit', async (e)
   
   showSuccess('agent-girls', `✅ Membro "${nick}" adicionado às Agent Girls!`);
   e.target.reset();
+  renderManageList();
 });
 
 // Adicionar Agent
@@ -389,6 +396,7 @@ document.getElementById('agents-form').addEventListener('submit', async (e) => {
   
   showSuccess('agents', `✅ Membro "${nick}" adicionado aos Agents!`);
   e.target.reset();
+  renderManageList();
 });
 
 // Adicionar Newbie
@@ -411,6 +419,7 @@ document.getElementById('newbies-form').addEventListener('submit', async (e) => 
   
   showSuccess('newbies', `✅ Membro "${nick}" adicionado aos Newbies!`);
   e.target.reset();
+  renderManageList();
 });
 
 // ========== LISTAR E REMOVER ==========
@@ -640,9 +649,7 @@ window.removeRole = function(roleId) {
 // Renderizar lista ao carregar
 renderManageList();
 
-// Atualizar lista após adicionar
-const originalShowSuccess = showSuccess;
-showSuccess = function(type, message) {
-  originalShowSuccess(type, message);
+// Recarregar lista a cada 2 segundos para pegar novos dados
+setInterval(() => {
   renderManageList();
-};
+}, 2000);
