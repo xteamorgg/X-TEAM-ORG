@@ -161,6 +161,7 @@ async function fetchData() {
     } else if (path.includes('about')) {
       renderMembers('leaders', getLocalServers('leaders_members'));
       renderMembers('investigators', getLocalServers('investigators_members'));
+      renderMembers('agent-girls', getLocalServers('agent_girls_members'));
       renderMembers('agents', getLocalServers('agents_members'));
       renderMembers('newbies', getLocalServers('newbies_members'));
     }
