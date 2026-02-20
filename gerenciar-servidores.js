@@ -206,6 +206,99 @@ document.getElementById('terminated-form').addEventListener('submit', async (e) 
 
 // ========== GERENCIAR MEMBROS ==========
 
+// Funções para gerenciar cargos personalizados
+function getCustomRoles() {
+  const data = localStorage.getItem('custom_roles');
+  return data ? JSON.parse(data) : [];
+}
+
+function saveCustomRoles(roles) {
+  localStorage.setItem('custom_roles', JSON.stringify(roles));
+}
+
+function updateRoleSelect() {
+  const select = document.getElementById('custom-member-role');
+  const customRoles = getCustomRoles();
+  
+  // Limpar opções personalizadas antigas
+  const options = select.querySelectorAll('option[data-custom="true"]');
+  options.forEach(opt => opt.remove());
+  
+  // Adicionar cargos personalizados
+  customRoles.forEach(role => {
+    const option = document.createElement('option');
+    option.value = role.id;
+    option.textContent = role.name;
+    option.setAttribute('data-custom', 'true');
+    select.appendChild(option);
+  });
+}
+
+// Criar novo cargo
+document.getElementById('role-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  const name = document.getElementById('role-name').value.trim();
+  const color = document.getElementById('role-color').value;
+  const order = parseInt(document.getElementById('role-order').value);
+  
+  const roleId = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') + '_members';
+  
+  const customRoles = getCustomRoles();
+  
+  // Verificar se já existe
+  if (customRoles.find(r => r.id === roleId)) {
+    showError('role', '❌ Já existe um cargo com este nome!');
+    return;
+  }
+  
+  const newRole = {
+    id: roleId,
+    name: name,
+    color: color,
+    order: order
+  };
+  
+  customRoles.push(newRole);
+  saveCustomRoles(customRoles);
+  updateRoleSelect();
+  
+  showSuccess('role', `✅ Cargo "${name}" criado com sucesso!`);
+  e.target.reset();
+  document.getElementById('role-color').value = '#a855f7';
+  document.getElementById('role-order').value = '5';
+});
+
+// Adicionar membro a cargo personalizado
+document.getElementById('custom-member-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  const roleId = document.getElementById('custom-member-role').value;
+  const nick = document.getElementById('custom-member-nick').value.trim();
+  const avatar = document.getElementById('custom-member-avatar').value.trim();
+  
+  const select = document.getElementById('custom-member-role');
+  const roleName = select.options[select.selectedIndex].text;
+  
+  const member = {
+    nick: nick,
+    avatar: avatar,
+    role: roleName
+  };
+  
+  // Salvar localmente
+  const members = getLocalServers(roleId);
+  members.push(member);
+  saveLocalServers(roleId, members);
+  
+  showSuccess('custom-member', `✅ Membro "${nick}" adicionado ao cargo ${roleName}!`);
+  e.target.reset();
+  renderManageList();
+});
+
+// Inicializar select de cargos
+updateRoleSelect();
+
 // Adicionar Leader
 document.getElementById('leaders-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -379,18 +472,36 @@ function renderManageList() {
   }
 
   // Renderizar membros
+  const customRoles = getCustomRoles();
   const allMembers = [
-    ...getLocalServers('leaders_members').map(m => ({...m, type: 'leaders_members'})),
-    ...getLocalServers('investigators_members').map(m => ({...m, type: 'investigators_members'})),
-    ...getLocalServers('agents_members').map(m => ({...m, type: 'agents_members'})),
-    ...getLocalServers('newbies_members').map(m => ({...m, type: 'newbies_members'}))
+    ...getLocalServers('leaders_members').map(m => ({...m, type: 'leaders_members', order: 1})),
+    ...getLocalServers('investigators_members').map(m => ({...m, type: 'investigators_members', order: 2})),
+    ...getLocalServers('agents_members').map(m => ({...m, type: 'agents_members', order: 3})),
+    ...getLocalServers('newbies_members').map(m => ({...m, type: 'newbies_members', order: 4}))
   ];
+  
+  // Adicionar membros de cargos personalizados
+  customRoles.forEach(role => {
+    const roleMembers = getLocalServers(role.id);
+    roleMembers.forEach(member => {
+      allMembers.push({
+        ...member,
+        type: role.id,
+        order: role.order,
+        customColor: role.color
+      });
+    });
+  });
+  
+  // Ordenar por ordem do cargo
+  allMembers.sort((a, b) => a.order - b.order);
   
   const membersList = document.getElementById('list-members');
   if (allMembers.length === 0) {
     membersList.innerHTML = '<div class="empty-list">Nenhum membro cadastrado</div>';
   } else {
-    membersList.innerHTML = allMembers.map((member, index) => {
+    membersList.innerHTML = allMembers.map((member) => {
+      const roleStyle = member.customColor ? `style="color: ${member.customColor};"` : '';
       return `
         <div class="manage-item">
           <div class="manage-item-info">
@@ -399,13 +510,52 @@ function renderManageList() {
             </div>
             <div class="manage-item-details">
               <div class="manage-item-name">${member.nick}</div>
-              <div class="manage-item-id">${member.role}</div>
+              <div class="manage-item-id" ${roleStyle}>${member.role}</div>
             </div>
           </div>
           <button class="remove-btn" onclick="removeMember('${member.type}', '${member.nick}')">Remover</button>
         </div>
       `;
     }).join('');
+  }
+  
+  // Renderizar lista de cargos personalizados
+  if (customRoles.length > 0) {
+    const rolesHtml = customRoles.map(role => `
+      <div class="manage-item">
+        <div class="manage-item-info">
+          <div class="manage-item-icon" style="background-color: ${role.color}20; border-color: ${role.color};">
+            <svg viewBox="0 0 24 24" fill="none" stroke="${role.color}" stroke-width="2" style="width: 24px; height: 24px;">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </div>
+          <div class="manage-item-details">
+            <div class="manage-item-name" style="color: ${role.color};">${role.name}</div>
+            <div class="manage-item-id">Ordem: ${role.order} • ${getLocalServers(role.id).length} membros</div>
+          </div>
+        </div>
+        <button class="remove-btn" onclick="removeRole('${role.id}')">Remover Cargo</button>
+      </div>
+    `).join('');
+    
+    // Adicionar seção de cargos se não existir
+    let rolesSection = document.getElementById('list-custom-roles');
+    if (!rolesSection) {
+      const container = document.createElement('div');
+      container.className = 'form-container';
+      container.innerHTML = `
+        <div class="form-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          <h2>Cargos Personalizados</h2>
+        </div>
+        <div id="list-custom-roles" class="server-list-manage"></div>
+      `;
+      membersList.parentElement.insertBefore(container, membersList.parentElement);
+      rolesSection = document.getElementById('list-custom-roles');
+    }
+    rolesSection.innerHTML = rolesHtml;
   }
 }
 
@@ -425,6 +575,37 @@ window.removeMember = function(type, nick) {
     const members = getLocalServers(type);
     const filtered = members.filter(m => m.nick !== nick);
     saveLocalServers(type, filtered);
+    renderManageList();
+  }
+};
+
+// Função global para remover cargo personalizado
+window.removeRole = function(roleId) {
+  const customRoles = getCustomRoles();
+  const role = customRoles.find(r => r.id === roleId);
+  
+  if (!role) return;
+  
+  const members = getLocalServers(roleId);
+  const memberCount = members.length;
+  
+  let confirmMsg = `Tem certeza que deseja remover o cargo "${role.name}"?`;
+  if (memberCount > 0) {
+    confirmMsg += `\n\nAVISO: Este cargo tem ${memberCount} membro(s). Todos serão removidos também!`;
+  }
+  
+  if (confirm(confirmMsg)) {
+    // Remover cargo
+    const filtered = customRoles.filter(r => r.id !== roleId);
+    saveCustomRoles(filtered);
+    
+    // Remover membros do cargo
+    localStorage.removeItem(roleId);
+    
+    // Atualizar select
+    updateRoleSelect();
+    
+    // Atualizar lista
     renderManageList();
   }
 };

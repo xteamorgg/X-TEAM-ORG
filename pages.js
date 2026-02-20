@@ -228,6 +228,53 @@ function renderMembers(containerId, members) {
   `).join('');
 }
 
+// Renderizar cargos personalizados
+function renderCustomRoles() {
+  const customRoles = JSON.parse(localStorage.getItem('custom_roles') || '[]');
+  
+  if (customRoles.length === 0) return;
+  
+  // Ordenar por ordem
+  customRoles.sort((a, b) => a.order - b.order);
+  
+  // Encontrar onde inserir (após newbies)
+  const newbiesSection = document.querySelector('.team-section:last-of-type');
+  if (!newbiesSection) return;
+  
+  customRoles.forEach(role => {
+    const members = getLocalServers(role.id);
+    
+    if (members.length === 0) return;
+    
+    // Criar seção do cargo
+    const section = document.createElement('div');
+    section.className = 'team-section';
+    section.innerHTML = `
+      <h2 class="section-title" style="color: ${role.color};">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${role.color}" stroke-width="2">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        ${role.name}
+      </h2>
+      <div class="members-grid" id="custom-${role.id}"></div>
+    `;
+    
+    newbiesSection.parentNode.insertBefore(section, newbiesSection.nextSibling);
+    
+    // Renderizar membros
+    const container = document.getElementById(`custom-${role.id}`);
+    container.innerHTML = members.map(member => `
+      <div class="member-card">
+        <img src="${member.avatar}" alt="${member.nick}" class="member-avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2256%22 height=%2256%22%3E%3Crect fill=%22%231a1a24%22 width=%2256%22 height=%2256%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22${role.color}%22 font-size=%2224%22%3E${member.nick.charAt(0).toUpperCase()}%3C/text%3E%3C/svg%3E'">
+        <div class="member-info">
+          <div class="member-nick">${member.nick}</div>
+          <div class="member-role" style="color: ${role.color};">${member.role}</div>
+        </div>
+      </div>
+    `).join('');
+  });
+}
+
 // Registrar visita ao carregar a página
 registerVisit();
 

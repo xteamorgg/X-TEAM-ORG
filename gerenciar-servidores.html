@@ -471,8 +471,81 @@
       </div>
     </div>
 
-    <!-- Leaders -->
+    <!-- Criar Novo Cargo -->
     <div class="form-container">
+      <div class="form-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        <h2>Criar Novo Cargo</h2>
+      </div>
+      <div id="role-success" class="success-message"></div>
+      <div id="role-error" class="error-message"></div>
+      <form id="role-form">
+        <div class="form-group">
+          <label for="role-name">Nome do Cargo *</label>
+          <input type="text" id="role-name" required placeholder="Ex: X MODERADORES">
+        </div>
+
+        <div class="form-group">
+          <label for="role-color">Cor do Cargo *</label>
+          <input type="color" id="role-color" value="#a855f7" required>
+          <small>Escolha a cor que representa o cargo</small>
+        </div>
+
+        <div class="form-group">
+          <label for="role-order">Ordem de Exibição *</label>
+          <input type="number" id="role-order" value="5" required min="1" placeholder="1 = primeiro">
+          <small>Menor número aparece primeiro (Leaders=1, Investigators=2, Agents=3, Newbies=4)</small>
+        </div>
+
+        <button type="submit" class="submit-btn">Criar Cargo</button>
+      </form>
+    </div>
+
+    <!-- Adicionar Membro a Cargo Personalizado -->
+    <div class="form-container">
+      <div class="form-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="8.5" cy="7" r="4"/>
+          <line x1="20" y1="8" x2="20" y2="14"/>
+          <line x1="23" y1="11" x2="17" y2="11"/>
+        </svg>
+        <h2>Adicionar Membro</h2>
+      </div>
+      <div id="custom-member-success" class="success-message"></div>
+      <div id="custom-member-error" class="error-message"></div>
+      <form id="custom-member-form">
+        <div class="form-group">
+          <label for="custom-member-role">Selecionar Cargo *</label>
+          <select id="custom-member-role" required>
+            <option value="">Escolha um cargo...</option>
+            <option value="leaders_members">X LEADERS – FOUNDERS</option>
+            <option value="investigators_members">X INVESTIGADORES</option>
+            <option value="agents_members">X AGENTS</option>
+            <option value="newbies_members">X NEWBIES</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="custom-member-nick">Nickname *</label>
+          <input type="text" id="custom-member-nick" required placeholder="Nome do membro">
+        </div>
+
+        <div class="form-group">
+          <label for="custom-member-avatar">URL do Avatar *</label>
+          <input type="url" id="custom-member-avatar" required placeholder="https://cdn.discordapp.com/avatars/...">
+        </div>
+
+        <button type="submit" class="submit-btn">Adicionar Membro</button>
+      </form>
+    </div>
+
+    <!-- Leaders -->
+    <div class="form-container" style="display: none;">
       <div class="form-header">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -497,7 +570,7 @@
     </div>
 
     <!-- Investigators -->
-    <div class="form-container">
+    <div class="form-container" style="display: none;">
       <div class="form-header">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"/>
@@ -523,7 +596,7 @@
     </div>
 
     <!-- Agents -->
-    <div class="form-container">
+    <div class="form-container" style="display: none;">
       <div class="form-header">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -550,7 +623,7 @@
     </div>
 
     <!-- Newbies -->
-    <div class="form-container">
+    <div class="form-container" style="display: none;">
       <div class="form-header">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
