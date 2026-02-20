@@ -1,131 +1,128 @@
-# Como Funciona o Modo Manutenção Automático
+# 🔧 COMO ATIVAR MODO MANUTENÇÃO
 
-## O que é?
-O modo manutenção é ativado **automaticamente** sempre que você faz um push para o GitHub. Os visitantes veem uma tela de atualização enquanto o site está sendo deployado.
+## ⚠️ MODO MANUTENÇÃO MANUAL
 
-## Processo Automático
+O modo manutenção agora é **MANUAL** para evitar loops infinitos durante deploys.
 
-### 1. Você faz um commit e push
+---
+
+## 🎯 QUANDO USAR
+
+Use o modo manutenção quando:
+- Fazer manutenção programada no site
+- Atualizar banco de dados
+- Fazer mudanças grandes que levam tempo
+- Quiser avisar usuários sobre atualização
+
+**NÃO é mais automático durante deploys!**
+
+---
+
+## ✅ COMO ATIVAR
+
+### 1. Editar `maintenance.json`
+
+Mudar de:
+```json
+{"maintenance":false,"message":"Servidor em atualização. Aguarde 10 segundos...","duration":10}
+```
+
+Para:
+```json
+{"maintenance":true,"message":"Servidor em manutenção. Voltamos em breve!","duration":30}
+```
+
+### 2. Fazer commit e push
+
 ```bash
-git add .
-git commit -m "Atualiza membros"
-git push
-```
-
-### 2. GitHub Actions detecta o push
-- O workflow de deploy é iniciado automaticamente
-
-### 3. Modo Manutenção é ATIVADO
-- O GitHub Actions ativa automaticamente o modo manutenção
-- Arquivo `maintenance.json` é atualizado para `"maintenance": true`
-- Visitantes veem a tela de manutenção com contador de 10 segundos
-
-### 4. Build e Deploy
-- O site é compilado (npm run build)
-- Arquivos são enviados para GitHub Pages
-- Deploy é realizado
-
-### 5. Aguarda 10 segundos
-- O workflow aguarda 10 segundos após o deploy
-
-### 6. Modo Manutenção é DESATIVADO
-- O GitHub Actions desativa automaticamente o modo manutenção
-- Arquivo `maintenance.json` é atualizado para `"maintenance": false`
-- Site volta ao normal
-
-## Você NÃO precisa fazer nada!
-
-✅ Tudo é automático
-✅ Manutenção ativa durante o deploy
-✅ Manutenção desativa após o deploy
-✅ Visitantes são avisados automaticamente
-
-## O que os visitantes veem?
-
-Durante o deploy (2-3 minutos):
-- 🔧 Tela de manutenção
-- "Servidor em atualização. Aguarde 10 segundos..."
-- Contador regressivo
-- Página recarrega automaticamente
-
-## Fluxo Completo
-
-```
-1. git push
-   ↓
-2. GitHub Actions inicia
-   ↓
-3. 🔧 MANUTENÇÃO ATIVADA (automático)
-   ↓
-4. Build do site
-   ↓
-5. Deploy para GitHub Pages
-   ↓
-6. Aguarda 10 segundos
-   ↓
-7. ✅ MANUTENÇÃO DESATIVADA (automático)
-   ↓
-8. Site funcionando normalmente
-```
-
-## Tempo Total
-
-- **Build + Deploy**: ~2-3 minutos
-- **Manutenção ativa**: Durante todo o processo
-- **Visitantes**: Veem tela de manutenção e página recarrega automaticamente
-
-## Vantagens
-
-✅ **Automático**: Não precisa ativar/desativar manualmente
-✅ **Profissional**: Visitantes sabem que o site está sendo atualizado
-✅ **Sem erros**: Visitantes não veem site quebrado durante deploy
-✅ **Transparente**: Contador mostra quanto tempo falta
-
-## Modo Manual (Opcional)
-
-Se quiser ativar manualmente (para manutenção programada):
-
-### Ativar
-```bash
-echo '{"maintenance":true,"message":"Manutenção programada...","duration":10}' > maintenance.json
 git add maintenance.json
-git commit -m "Ativa manutenção manual"
-git push
+git commit -m "🔧 Ativa modo manutenção"
+git push origin main
 ```
 
-### Desativar
+### 3. Aguardar deploy (2-3 minutos)
+
+O site mostrará o overlay de manutenção para todos os usuários.
+
+---
+
+## ❌ COMO DESATIVAR
+
+### 1. Editar `maintenance.json`
+
+Mudar de volta para:
+```json
+{"maintenance":false,"message":"Servidor em atualização. Aguarde 10 segundos...","duration":10}
+```
+
+### 2. Fazer commit e push
+
 ```bash
+git add maintenance.json
+git commit -m "✅ Desativa modo manutenção"
+git push origin main
+```
+
+### 3. Aguardar deploy (2-3 minutos)
+
+O site voltará ao normal.
+
+---
+
+## 🎨 PERSONALIZAR MENSAGEM
+
+Você pode personalizar a mensagem e duração:
+
+```json
+{
+  "maintenance": true,
+  "message": "Estamos atualizando o sistema. Voltamos em 5 minutos!",
+  "duration": 300
+}
+```
+
+- `maintenance`: `true` = ativo, `false` = desativado
+- `message`: Texto que aparece para o usuário
+- `duration`: Tempo em segundos do countdown (300 = 5 minutos)
+
+---
+
+## 🚨 IMPORTANTE
+
+- **Sempre desative após terminar a manutenção!**
+- Usuários verão o overlay e não conseguirão usar o site
+- O countdown recarrega a página automaticamente ao chegar em 0
+- Se esquecer desativado, usuários ficarão presos no loop
+
+---
+
+## 📝 EXEMPLO DE USO
+
+```bash
+# Ativar manutenção
+echo '{"maintenance":true,"message":"Manutenção programada. Voltamos em 10 minutos!","duration":600}' > maintenance.json
+git add maintenance.json
+git commit -m "🔧 Manutenção programada"
+git push origin main
+
+# Fazer as mudanças necessárias...
+
+# Desativar manutenção
 echo '{"maintenance":false,"message":"Servidor em atualização. Aguarde 10 segundos...","duration":10}' > maintenance.json
 git add maintenance.json
-git commit -m "Desativa manutenção manual"
-git push
+git commit -m "✅ Manutenção concluída"
+git push origin main
 ```
 
-## Personalizar Mensagem
+---
 
-Edite o workflow `.github/workflows/deploy.yml` para mudar a mensagem:
+## ✨ RESULTADO
 
-```yaml
-- name: Ativar Modo Manutenção
-  run: |
-    echo '{"maintenance":true,"message":"SUA MENSAGEM AQUI","duration":15}' > maintenance.json
-```
+Quando ativado, usuários veem:
+- Overlay escuro cobrindo toda a página
+- Ícone de loading girando
+- Mensagem personalizada
+- Countdown em segundos
+- Página recarrega automaticamente ao fim
 
-## Troubleshooting
-
-**Problema**: Manutenção não aparece
-- Solução: Aguarde 1-2 minutos após o push, limpe cache (Ctrl+F5)
-
-**Problema**: Manutenção fica ativa para sempre
-- Solução: O workflow desativa automaticamente. Se não desativar, faça manualmente
-
-**Problema**: Quero desabilitar o modo automático
-- Solução: Remova os steps de manutenção do arquivo `.github/workflows/deploy.yml`
-
-## Logs do GitHub Actions
-
-Para ver o processo:
-1. Vá no repositório GitHub
-2. Clique em "Actions"
-3. Veja o workflow rodando
-4. Veja os logs de "Ativar Modo Manutenção" e "Desativar Modo Manutenção"
+**Modo manutenção agora é totalmente controlado por você! 🎮**
