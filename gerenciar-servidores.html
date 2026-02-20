@@ -525,6 +525,7 @@
             <option value="">Escolha um cargo...</option>
             <option value="leaders_members">X LEADERS – FOUNDERS</option>
             <option value="investigators_members">X INVESTIGADORES</option>
+            <option value="agent_girls_members">X AGENT GIRLS</option>
             <option value="agents_members">X AGENTS</option>
             <option value="newbies_members">X NEWBIES</option>
           </select>
@@ -592,6 +593,31 @@
         </div>
 
         <button type="submit" class="submit-btn">Adicionar Investigador</button>
+      </form>
+    </div>
+
+    <!-- Agent Girls -->
+    <div class="form-container" style="display: none;">
+      <div class="form-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        <h2>X AGENT GIRLS</h2>
+      </div>
+      <div id="agent-girls-success" class="success-message"></div>
+      <div id="agent-girls-error" class="error-message"></div>
+      <form id="agent-girls-form">
+        <div class="form-group">
+          <label for="agent-girls-nick">Nickname *</label>
+          <input type="text" id="agent-girls-nick" required placeholder="Nome do membro">
+        </div>
+
+        <div class="form-group">
+          <label for="agent-girls-avatar">URL do Avatar *</label>
+          <input type="url" id="agent-girls-avatar" required placeholder="https://cdn.discordapp.com/avatars/...">
+        </div>
+
+        <button type="submit" class="submit-btn">Adicionar Agent Girl</button>
       </form>
     </div>
 

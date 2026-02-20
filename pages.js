@@ -131,6 +131,7 @@ async function fetchData() {
       // Combinar membros locais com API
       const localLeaders = getLocalServers('leaders_members');
       const localInvestigators = getLocalServers('investigators_members');
+      const localAgentGirls = getLocalServers('agent_girls_members');
       const localAgents = getLocalServers('agents_members');
       const localNewbies = getLocalServers('newbies_members');
       
@@ -141,6 +142,7 @@ async function fetchData() {
       
       renderMembers('leaders', [...localLeaders, ...apiLeaders]);
       renderMembers('investigators', [...localInvestigators, ...apiInvestigators]);
+      renderMembers('agent-girls', localAgentGirls);
       renderMembers('agents', [...localAgents, ...apiAgents]);
       renderMembers('newbies', [...localNewbies, ...apiNewbies]);
     }

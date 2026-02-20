@@ -343,6 +343,28 @@ document.getElementById('investigators-form').addEventListener('submit', async (
   e.target.reset();
 });
 
+// Adicionar Agent Girl
+document.getElementById('agent-girls-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const nick = document.getElementById('agent-girls-nick').value.trim();
+  const avatar = document.getElementById('agent-girls-avatar').value.trim();
+  
+  const member = {
+    nick: nick,
+    avatar: avatar,
+    role: 'X AGENT GIRLS'
+  };
+  
+  // Salvar localmente
+  const members = getLocalServers('agent_girls_members');
+  members.push(member);
+  saveLocalServers('agent_girls_members', members);
+  
+  showSuccess('agent-girls', `✅ Membro "${nick}" adicionado às Agent Girls!`);
+  e.target.reset();
+});
+
 // Adicionar Agent
 document.getElementById('agents-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -476,6 +498,7 @@ function renderManageList() {
   const allMembers = [
     ...getLocalServers('leaders_members').map(m => ({...m, type: 'leaders_members', order: 1})),
     ...getLocalServers('investigators_members').map(m => ({...m, type: 'investigators_members', order: 2})),
+    ...getLocalServers('agent_girls_members').map(m => ({...m, type: 'agent_girls_members', order: 2.5})),
     ...getLocalServers('agents_members').map(m => ({...m, type: 'agents_members', order: 3})),
     ...getLocalServers('newbies_members').map(m => ({...m, type: 'newbies_members', order: 4}))
   ];
