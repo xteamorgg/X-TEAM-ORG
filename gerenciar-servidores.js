@@ -224,8 +224,12 @@ function updateRoleSelect() {
   const options = select.querySelectorAll('option[data-custom="true"]');
   options.forEach(opt => opt.remove());
   
-  // Adicionar cargos personalizados
+  // Adicionar cargos personalizados (evitar duplicatas)
   customRoles.forEach(role => {
+    // Verificar se já existe uma opção com este value
+    const existingOption = select.querySelector(`option[value="${role.id}"]`);
+    if (existingOption) return; // Pular se já existe
+    
     const option = document.createElement('option');
     option.value = role.id;
     option.textContent = role.name;
