@@ -1,7 +1,9 @@
 // Detectar ambiente (produção ou desenvolvimento)
 const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
 // URL da API baseada no ambiente
-const API_URL = isProduction ? 'https://xteam-platform.onrender.com/api' : 'http://localhost:3000/api';
+const API_URL = isProduction ? 'https://x-team-org.onrender.com/api' : 'http://localhost:3000/api';
+// Webhook do Discord para denúncias
+const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1474333015080702077/tB4XypRDxQWlodBK_V-lEUA-sO8YRIKzE-fCb0pZ5aLWtoq78WNI9SvwcXCdMLFPSomK';
 
 // Verificar se usuário está logado
 function isUserLoggedIn() {
@@ -156,25 +158,69 @@ async function submitReport(event) {
   
   try {
     const user = getUserData();
-    const response = await fetch(`${API_URL}/report`, {
+    
+    // Buscar informações do servidor pelo convite
+    const inviteResponse = await fetch(`https://discord.com/api/v10/invites/${inviteCode}`);
+    
+    if (!inviteResponse.ok) {
+      errorDiv.textContent = '❌ Convite inválido ou expirado';
+      errorDiv.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+        </svg>
+        Enviar Denúncia
+      `;
+      return;
+    }
+    
+    const inviteData = await inviteResponse.json();
+    const guild = inviteData.guild;
+    
+    // Criar embed para o webhook
+    const webhookPayload = {
+      embeds: [{
+        color: 0xef4444, // Vermelho
+        title: '🚨 Nova Denúncia de Servidor',
+        description: `**Servidor Denunciado:**\n${guild.name} (ID: ${guild.id})`,
+        fields: [
+          {
+            name: '📝 Motivo',
+            value: message,
+            inline: false
+          },
+          {
+            name: '👤 Denunciante',
+            value: `${user.username}${user.discriminator && user.discriminator !== '0' ? '#' + user.discriminator : ''} (ID: ${user.id})`,
+            inline: false
+          },
+          {
+            name: '🔗 Convite',
+            value: `discord.gg/${inviteCode}`,
+            inline: false
+          }
+        ],
+        thumbnail: guild.icon ? {
+          url: `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`
+        } : null,
+        timestamp: new Date().toISOString(),
+        footer: {
+          text: 'X TEAM - Sistema de Denúncias'
+        }
+      }]
+    };
+    
+    // Enviar para o webhook do Discord
+    const webhookResponse = await fetch(DISCORD_WEBHOOK_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        inviteCode,
-        message,
-        reporter: {
-          id: user.id,
-          username: user.username,
-          discriminator: user.discriminator
-        }
-      })
+      body: JSON.stringify(webhookPayload)
     });
     
-    const data = await response.json();
-    
-    if (response.ok) {
+    if (webhookResponse.ok || webhookResponse.status === 204) {
       successDiv.textContent = '✅ Denúncia enviada com sucesso! Os administradores foram notificados.';
       successDiv.style.display = 'block';
       
@@ -187,7 +233,7 @@ async function submitReport(event) {
         closeReportModal();
       }, 3000);
     } else {
-      errorDiv.textContent = `❌ ${data.error || 'Erro ao enviar denúncia'}`;
+      errorDiv.textContent = '❌ Erro ao enviar denúncia. Tente novamente.';
       errorDiv.style.display = 'block';
     }
   } catch (error) {

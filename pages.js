@@ -3,6 +3,7 @@ import { config } from './config.js';
 
 // Registrar visita (sempre, mesmo IP)
 async function registerVisit() {
+  // Verificar se já registrou visita nesta sessão
   const visitRegistered = sessionStorage.getItem('visit_registered');
   
   if (visitRegistered) {
@@ -10,6 +11,12 @@ async function registerVisit() {
     return;
   }
   
+  // Incrementar contador local
+  let localCount = parseInt(localStorage.getItem('visitor_count') || '0');
+  localCount++;
+  localStorage.setItem('visitor_count', localCount.toString());
+  
+  // Tentar registrar na API também
   try {
     const response = await fetch(`${config.apiUrl}/visit`, {
       method: 'POST',
@@ -21,24 +28,43 @@ async function registerVisit() {
     
     if (response.ok) {
       const data = await response.json();
-      updateVisitorCount(data.total);
+      // Usar o maior valor entre local e API
+      const finalCount = Math.max(localCount, data.total || 0);
+      localStorage.setItem('visitor_count', finalCount.toString());
+      updateVisitorCount(finalCount);
+      sessionStorage.setItem('visit_registered', 'true');
+    } else {
+      // Se API falhar, usar contador local
+      updateVisitorCount(localCount);
       sessionStorage.setItem('visit_registered', 'true');
     }
   } catch (error) {
-    console.error('Erro ao registrar visita:', error);
+    console.error('Erro ao registrar visita na API:', error);
+    // Se API falhar, usar contador local
+    updateVisitorCount(localCount);
+    sessionStorage.setItem('visit_registered', 'true');
   }
 }
 
 // Buscar contador de visitantes sem registrar visita
 async function fetchVisitorCount() {
+  const localCount = parseInt(localStorage.getItem('visitor_count') || '0');
+  
   try {
     const response = await fetch(`${config.apiUrl}/data`);
     const data = await response.json();
     if (data.visitors) {
-      updateVisitorCount(data.visitors.total);
+      // Usar o maior valor entre local e API
+      const finalCount = Math.max(localCount, data.visitors.total || 0);
+      localStorage.setItem('visitor_count', finalCount.toString());
+      updateVisitorCount(finalCount);
+    } else {
+      updateVisitorCount(localCount);
     }
   } catch (error) {
     console.error('Erro ao buscar contador:', error);
+    // Se API falhar, usar contador local
+    updateVisitorCount(localCount);
   }
 }
 
