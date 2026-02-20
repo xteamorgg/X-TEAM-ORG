@@ -293,3 +293,148 @@ document.getElementById('newbies-form').addEventListener('submit', async (e) => 
   showSuccess('newbies', `✅ Membro "${nick}" adicionado aos Newbies!`);
   e.target.reset();
 });
+
+// ========== LISTAR E REMOVER ==========
+
+function renderManageList() {
+  // Renderizar servidores suspeitos
+  const suspiciousServers = getLocalServers('suspicious');
+  const suspiciousList = document.getElementById('list-suspicious-servers');
+  if (suspiciousServers.length === 0) {
+    suspiciousList.innerHTML = '<div class="empty-list">Nenhum servidor suspeito cadastrado</div>';
+  } else {
+    suspiciousList.innerHTML = suspiciousServers.map((server, index) => {
+      const isUrl = server.icon && (server.icon.startsWith('http') || server.icon.startsWith('https'));
+      const iconHtml = isUrl 
+        ? `<img src="${server.icon}" alt="${server.name}" onerror="this.style.display='none'; this.parentElement.textContent='🔍';">`
+        : server.icon || '🔍';
+      
+      return `
+        <div class="manage-item">
+          <div class="manage-item-info">
+            <div class="manage-item-icon">${iconHtml}</div>
+            <div class="manage-item-details">
+              <div class="manage-item-name">${server.name}</div>
+              <div class="manage-item-id">ID: ${server.id}</div>
+            </div>
+          </div>
+          <button class="remove-btn" onclick="removeItem('suspicious', ${index})">Remover</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Renderizar servidores investigados
+  const investigatedServers = getLocalServers('investigated');
+  const investigatedList = document.getElementById('list-investigated-servers');
+  if (investigatedServers.length === 0) {
+    investigatedList.innerHTML = '<div class="empty-list">Nenhum servidor investigado cadastrado</div>';
+  } else {
+    investigatedList.innerHTML = investigatedServers.map((server, index) => {
+      const isUrl = server.icon && (server.icon.startsWith('http') || server.icon.startsWith('https'));
+      const iconHtml = isUrl 
+        ? `<img src="${server.icon}" alt="${server.name}" onerror="this.style.display='none'; this.parentElement.textContent='✅';">`
+        : server.icon || '✅';
+      
+      return `
+        <div class="manage-item">
+          <div class="manage-item-info">
+            <div class="manage-item-icon">${iconHtml}</div>
+            <div class="manage-item-details">
+              <div class="manage-item-name">${server.name}</div>
+              <div class="manage-item-id">ID: ${server.id}</div>
+            </div>
+          </div>
+          <button class="remove-btn" onclick="removeItem('investigated', ${index})">Remover</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Renderizar servidores desativados
+  const terminatedServers = getLocalServers('terminated');
+  const terminatedList = document.getElementById('list-terminated-servers');
+  if (terminatedServers.length === 0) {
+    terminatedList.innerHTML = '<div class="empty-list">Nenhum servidor desativado cadastrado</div>';
+  } else {
+    terminatedList.innerHTML = terminatedServers.map((server, index) => {
+      const isUrl = server.icon && (server.icon.startsWith('http') || server.icon.startsWith('https'));
+      const iconHtml = isUrl 
+        ? `<img src="${server.icon}" alt="${server.name}" onerror="this.style.display='none'; this.parentElement.textContent='❌';">`
+        : server.icon || '❌';
+      
+      return `
+        <div class="manage-item">
+          <div class="manage-item-info">
+            <div class="manage-item-icon">${iconHtml}</div>
+            <div class="manage-item-details">
+              <div class="manage-item-name">${server.name}</div>
+              <div class="manage-item-id">ID: ${server.id}</div>
+            </div>
+          </div>
+          <button class="remove-btn" onclick="removeItem('terminated', ${index})">Remover</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Renderizar membros
+  const allMembers = [
+    ...getLocalServers('leaders_members').map(m => ({...m, type: 'leaders_members'})),
+    ...getLocalServers('investigators_members').map(m => ({...m, type: 'investigators_members'})),
+    ...getLocalServers('agents_members').map(m => ({...m, type: 'agents_members'})),
+    ...getLocalServers('newbies_members').map(m => ({...m, type: 'newbies_members'}))
+  ];
+  
+  const membersList = document.getElementById('list-members');
+  if (allMembers.length === 0) {
+    membersList.innerHTML = '<div class="empty-list">Nenhum membro cadastrado</div>';
+  } else {
+    membersList.innerHTML = allMembers.map((member, index) => {
+      return `
+        <div class="manage-item">
+          <div class="manage-item-info">
+            <div class="manage-item-icon">
+              <img src="${member.avatar}" alt="${member.nick}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2248%22 height=%2248%22%3E%3Crect fill=%22%231a1a24%22 width=%2248%22 height=%2248%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23a855f7%22 font-size=%2220%22%3E${member.nick.charAt(0).toUpperCase()}%3C/text%3E%3C/svg%3E'">
+            </div>
+            <div class="manage-item-details">
+              <div class="manage-item-name">${member.nick}</div>
+              <div class="manage-item-id">${member.role}</div>
+            </div>
+          </div>
+          <button class="remove-btn" onclick="removeMember('${member.type}', '${member.nick}')">Remover</button>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+// Função global para remover servidor
+window.removeItem = function(type, index) {
+  if (confirm('Tem certeza que deseja remover este servidor?')) {
+    const servers = getLocalServers(type);
+    servers.splice(index, 1);
+    saveLocalServers(type, servers);
+    renderManageList();
+  }
+};
+
+// Função global para remover membro
+window.removeMember = function(type, nick) {
+  if (confirm(`Tem certeza que deseja remover ${nick}?`)) {
+    const members = getLocalServers(type);
+    const filtered = members.filter(m => m.nick !== nick);
+    saveLocalServers(type, filtered);
+    renderManageList();
+  }
+};
+
+// Renderizar lista ao carregar
+renderManageList();
+
+// Atualizar lista após adicionar
+const originalShowSuccess = showSuccess;
+showSuccess = function(type, message) {
+  originalShowSuccess(type, message);
+  renderManageList();
+};
